@@ -9,6 +9,7 @@
       href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
       tailwind.config = {
         darkMode: "class",
@@ -60,7 +61,6 @@
         font-size: clamp(22px, 3.5vw, 40px);
       }
 
-      /* ── LIGHT MODE ── */
       html.light body {
         background: #f3f3f3;
         color: #111;
@@ -114,10 +114,6 @@
       html.light .bg-\[#080808\] {
         background: #e0e0e0 !important;
       }
-      html.light .bg-\[\#1a0800\],
-      html.light .bg-gradient-to-br {
-        background: #fff8ee !important;
-      }
       html.light .text-\[\#777\] {
         color: #555 !important;
       }
@@ -129,9 +125,6 @@
       }
       html.light .border-\[\#1a1a1a\] {
         border-color: #ddd !important;
-      }
-      html.light .bg-dark-border2 {
-        background: #ddd !important;
       }
       html.light input,
       html.light select {
@@ -192,7 +185,6 @@
       .sport-fade {
         animation: fadeUp 0.3s ease;
       }
-
       @keyframes slideInLeft {
         from {
           opacity: 0;
@@ -220,6 +212,39 @@
         animation: slideOutLeft 0.35s ease forwards;
       }
 
+      /* PIN styles */
+      @keyframes pinPop {
+        0% {
+          transform: scale(0.6);
+        }
+        60% {
+          transform: scale(1.3);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      .pin-pop {
+        animation: pinPop 0.18s ease forwards;
+      }
+      @keyframes pinShake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        20%,
+        60% {
+          transform: translateX(-8px);
+        }
+        40%,
+        80% {
+          transform: translateX(8px);
+        }
+      }
+      .pin-shake {
+        animation: pinShake 0.4s ease;
+      }
+
       ::-webkit-scrollbar {
         width: 5px;
       }
@@ -230,7 +255,6 @@
         background: #333;
         border-radius: 4px;
       }
-
       select option {
         background: #181818;
         color: #f3f4f6;
@@ -240,8 +264,6 @@
         color: #111;
       }
 
-      /* ── NAV auth/guest visibility ── */
-      /* Desktop (md+): guest visible, auth hidden by default */
       @media (min-width: 768px) {
         #nav-auth {
           display: none !important;
@@ -256,7 +278,6 @@
           display: none !important;
         }
       }
-      /* Mobile: both desktop nav groups always hidden */
       @media (max-width: 767px) {
         #nav-auth {
           display: none !important;
@@ -265,7 +286,6 @@
           display: none !important;
         }
       }
-      /* Mobile hamburger menu: guest visible, auth hidden by default */
       #mobile-auth {
         display: none !important;
       }
@@ -279,18 +299,6 @@
         display: none !important;
       }
 
-      /* Landing sections hidden when logged in */
-      body.user-authed #nav-center-links,
-      body.user-authed #hero-cta-join,
-      body.user-authed #hero-cta-plans,
-      body.user-authed #landing-plans-section,
-      body.user-authed #landing-sports-section,
-      body.user-authed #landing-sbooks-section,
-      body.user-authed #landing-testi-section {
-        display: none !important;
-      }
-
-      /* Mobile menu hidden by default */
       #mobile-menu {
         display: none;
       }
@@ -298,8 +306,6 @@
         display: flex;
         flex-direction: column;
       }
-
-      /* Hamburger lines */
       .ham-line {
         display: block;
         width: 22px;
@@ -309,13 +315,9 @@
         transition: all 0.25s;
       }
 
-      /* ── Responsive tweaks ── */
       @media (max-width: 640px) {
         .hero-stats {
           gap: 1.5rem;
-        }
-        .plan-grid-col {
-          grid-template-columns: 1fr;
         }
         #plans-grid,
         #choose-plans-grid {
@@ -334,8 +336,6 @@
           grid-template-columns: repeat(4, 1fr);
         }
       }
-
-      /* Auth buttons don't wrap weirdly on small screens */
       #nav-guest,
       #nav-auth {
         flex-wrap: nowrap;
@@ -343,26 +343,23 @@
     </style>
   </head>
   <body class="bg-dark-bg text-gray-100 min-h-screen">
-    <!-- ══════════════ NAV ══════════════ -->
+    <!-- NAV -->
     <nav
       id="navbar"
       class="fixed top-0 w-full z-50 h-16 flex items-center justify-between px-4 md:px-8 border-b border-dark-border2 backdrop-blur-md bg-dark-bg/95 transition-all duration-300"
     >
-      <!-- Logo -->
       <button
         onclick="showPage('landing')"
         class="font-anton text-xl md:text-2xl tracking-[3px] text-gold flex items-center gap-2 flex-shrink-0"
       >
-        🃏 BET MAFIA
+        &#127183; BET MAFIA
       </button>
-
-      <!-- Desktop center nav — hidden when logged in -->
       <div id="nav-center-links" class="hidden lg:flex items-center gap-1">
         <button
           onclick="showPage('landing')"
           class="text-gray-400 hover:text-gold text-13 font-medium px-3 py-1.5 rounded transition-colors"
         >
-          🏠 Home
+          &#127968; Home
         </button>
         <button
           onclick="scrollToSection('plans-section')"
@@ -389,10 +386,7 @@
           Reviews
         </button>
       </div>
-
-      <!-- Right cluster -->
       <div class="flex items-center gap-2">
-        <!-- Theme toggle -->
         <button
           onclick="toggleTheme()"
           id="theme-btn"
@@ -401,16 +395,14 @@
           <span
             id="icon-moon"
             class="px-2 py-0.5 rounded-full text-xs transition-all"
-            >🌙</span
+            >&#127769;</span
           >
           <span
             id="icon-sun"
             class="px-2 py-0.5 rounded-full text-xs transition-all"
-            >☀️</span
+            >&#9728;&#65039;</span
           >
         </button>
-
-        <!-- GUEST buttons (desktop only — mobile uses hamburger menu) -->
         <div id="nav-guest" class="hidden md:flex items-center gap-2">
           <button
             onclick="showPage('signin')"
@@ -425,8 +417,6 @@
             Join Now
           </button>
         </div>
-
-        <!-- AUTH buttons (desktop only — mobile uses hamburger menu) -->
         <div id="nav-auth" class="hidden md:flex items-center gap-2">
           <span
             id="nav-username"
@@ -436,7 +426,7 @@
             onclick="showPage('dashboard')"
             class="flex items-center gap-1.5 bg-gold/10 border border-gold text-gold px-4 py-2 rounded text-11 font-bold tracking-widest uppercase hover:bg-gold hover:text-black transition-all whitespace-nowrap"
           >
-            📊 Dashboard
+            &#128202; Dashboard
           </button>
           <button
             onclick="logout()"
@@ -445,22 +435,19 @@
             Log Out
           </button>
         </div>
-
-        <!-- Hamburger (mobile) -->
         <button
           id="hamburger-btn"
           onclick="toggleMobileMenu()"
           class="md:hidden flex flex-col gap-1.5 p-2 cursor-pointer bg-transparent border-none"
           aria-label="Menu"
         >
-          <span class="ham-line"></span>
-          <span class="ham-line"></span>
-          <span class="ham-line"></span>
+          <span class="ham-line"></span><span class="ham-line"></span
+          ><span class="ham-line"></span>
         </button>
       </div>
     </nav>
 
-    <!-- ══════════════ MOBILE MENU ══════════════ -->
+    <!-- MOBILE MENU -->
     <div
       id="mobile-menu"
       class="fixed top-16 left-0 w-full z-40 flex-col gap-1 px-5 py-3 bg-dark-bg border-b border-dark-border2 backdrop-blur-md shadow-xl"
@@ -472,50 +459,44 @@
         "
         class="text-left text-gray-100 text-[15px] font-medium py-3 border-b border-dark-border2 w-full"
       >
-        🏠 Home
+        &#127968; Home
       </button>
       <button
-        id="mobile-nav-plans"
         onclick="
           closeMobileMenu();
           scrollToSection('plans-section');
         "
         class="text-left text-gray-100 text-[15px] font-medium py-3 border-b border-dark-border2 w-full"
       >
-        💰 Plans
+        &#128176; Plans
       </button>
       <button
-        id="mobile-nav-sports"
         onclick="
           closeMobileMenu();
           scrollToSection('sports-section');
         "
         class="text-left text-gray-100 text-[15px] font-medium py-3 border-b border-dark-border2 w-full"
       >
-        🏀 Sports
+        &#127936; Sports
       </button>
       <button
-        id="mobile-nav-winrates"
         onclick="
           closeMobileMenu();
           scrollToSection('sbooks-section');
         "
         class="text-left text-gray-100 text-[15px] font-medium py-3 border-b border-dark-border2 w-full"
       >
-        📊 Win Rates
+        &#128202; Win Rates
       </button>
       <button
-        id="mobile-nav-reviews"
         onclick="
           closeMobileMenu();
           scrollToSection('testi-section');
         "
         class="text-left text-gray-100 text-[15px] font-medium py-3 border-b border-dark-border2 w-full"
       >
-        ⭐ Reviews
+        &#11088; Reviews
       </button>
-
-      <!-- Mobile GUEST buttons -->
       <div id="mobile-guest" class="flex flex-col gap-2 pt-3 pb-1">
         <button
           onclick="
@@ -536,8 +517,6 @@
           Join Now
         </button>
       </div>
-
-      <!-- Mobile AUTH buttons -->
       <div id="mobile-auth" class="flex flex-col gap-2 pt-3 pb-1">
         <div
           id="mobile-username"
@@ -550,7 +529,7 @@
           "
           class="w-full bg-gold/10 border border-gold text-gold py-3 rounded text-11 font-bold uppercase tracking-widest hover:bg-gold hover:text-black transition-all"
         >
-          📊 Dashboard
+          &#128202; Dashboard
         </button>
         <button
           onclick="
@@ -564,9 +543,8 @@
       </div>
     </div>
 
-    <!-- ══════════════ LANDING ══════════════ -->
+    <!-- LANDING -->
     <div id="page-landing" class="pt-16">
-      <!-- Hero -->
       <section
         class="relative min-h-[calc(100vh-64px)] flex flex-col items-center justify-center text-center px-5 py-16 overflow-hidden"
       >
@@ -591,7 +569,7 @@
           <div
             class="inline-block bg-red/15 border border-red text-red px-4 py-1.5 rounded-sm text-11 font-bold tracking-[3px] uppercase mb-7"
           >
-            🔥 Elite VIP Picks Network
+            &#128293; Elite VIP Picks Network
           </div>
           <h1 class="hero-title font-anton text-gray-100">
             BET<span class="block text-gold">MAFIA</span>
@@ -648,7 +626,7 @@
               </div>
             </div>
             <div class="text-center">
-              <div class="stat-num-size font-anton text-gold">5★</div>
+              <div class="stat-num-size font-anton text-gold">5&#9733;</div>
               <div class="text-11 text-gray-400 tracking-[2px] uppercase mt-1">
                 Rating
               </div>
@@ -657,7 +635,6 @@
         </div>
       </section>
 
-      <!-- Sports — hidden when logged in -->
       <section id="landing-sports-section">
         <section
           id="sports-section"
@@ -686,7 +663,6 @@
         </section>
       </section>
 
-      <!-- Sportsbooks — hidden when logged in -->
       <section id="landing-sbooks-section">
         <div
           id="sbooks-section"
@@ -717,7 +693,6 @@
         </div>
       </section>
 
-      <!-- Plans — hidden when logged in -->
       <section id="landing-plans-section">
         <div
           id="plans-section"
@@ -743,7 +718,6 @@
         </div>
       </section>
 
-      <!-- Testimonials — hidden when logged in -->
       <section id="landing-testi-section">
         <div id="testi-section" class="bg-dark-bg2 py-16 md:py-20 px-4 md:px-5">
           <div class="max-w-6xl mx-auto">
@@ -768,14 +742,13 @@
         </div>
       </section>
 
-      <!-- Footer -->
       <footer class="bg-[#080808]">
         <div
           class="max-w-6xl mx-auto px-5 md:px-14 pt-14 pb-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10"
         >
           <div class="sm:col-span-2 lg:col-span-1">
             <div class="font-anton text-xl tracking-[3px] text-gold mb-4">
-              🃏 BET MAFIA
+              &#127183; BET MAFIA
             </div>
             <p class="text-[#777] text-13 leading-relaxed max-w-xs">
               The most feared VIP picks network on the internet. Elite cappers,
@@ -811,7 +784,7 @@
                   onclick="scrollToSection('plans-section')"
                   class="hover:text-gold transition-colors bg-transparent border-none cursor-pointer text-[#777]"
                 >
-                  5-Day Trial — $80
+                  5-Day Trial &#8212; $80
                 </button>
               </li>
               <li>
@@ -819,7 +792,7 @@
                   onclick="scrollToSection('plans-section')"
                   class="hover:text-gold transition-colors bg-transparent border-none cursor-pointer text-[#777]"
                 >
-                  Weekly — $150
+                  Weekly &#8212; $150
                 </button>
               </li>
               <li>
@@ -827,7 +800,7 @@
                   onclick="scrollToSection('plans-section')"
                   class="hover:text-gold transition-colors bg-transparent border-none cursor-pointer text-[#777]"
                 >
-                  Monthly — $300
+                  Monthly &#8212; $300
                 </button>
               </li>
               <li>
@@ -835,7 +808,7 @@
                   onclick="scrollToSection('plans-section')"
                   class="hover:text-gold transition-colors bg-transparent border-none cursor-pointer text-[#777]"
                 >
-                  Lifetime — $1,000
+                  Lifetime &#8212; $1,000
                 </button>
               </li>
             </ul>
@@ -965,18 +938,18 @@
           class="max-w-6xl mx-auto px-5 md:px-14 pb-6 pt-4 border-t border-[#1a1a1a] flex flex-wrap gap-4 justify-between items-start"
         >
           <p class="text-xs text-[#555]">
-            © 2025 Bet Mafia VIP. All rights reserved.
+            &#169; 2025 Bet Mafia VIP. All rights reserved.
           </p>
           <p class="text-11 text-[#444] max-w-lg leading-relaxed">
-            ⚠️ Sports betting involves risk. Past performance does not guarantee
-            future results. Must be 21+ in a legal jurisdiction. Please gamble
-            responsibly.
+            &#9888;&#65039; Sports betting involves risk. Past performance does
+            not guarantee future results. Must be 21+ in a legal jurisdiction.
+            Please gamble responsibly.
           </p>
         </div>
       </footer>
     </div>
 
-    <!-- ══════════════ SIGN IN ══════════════ -->
+    <!-- SIGN IN -->
     <div
       id="page-signin"
       class="hidden min-h-screen bg-dark-bg flex items-center justify-center px-4 pt-20 pb-10"
@@ -987,7 +960,7 @@
         <div
           class="font-anton text-2xl tracking-[3px] text-gold text-center mb-1"
         >
-          🃏 BET MAFIA
+          &#127183; BET MAFIA
         </div>
         <div
           class="text-11 text-gray-500 tracking-[2px] uppercase text-center mb-8"
@@ -1018,7 +991,7 @@
           <input
             id="signin-password"
             type="password"
-            placeholder="••••••••"
+            placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;"
             onkeydown="if (event.key === 'Enter') handleSignIn();"
             class="w-full bg-dark-card2 border border-dark-border2 text-gray-100 px-4 py-3 rounded text-[14px] outline-none focus:border-gold transition-colors placeholder-gray-600"
           />
@@ -1026,7 +999,7 @@
             id="signin-error"
             class="hidden text-red text-xs mt-1.5 font-medium"
           >
-            ❌ Invalid email or password.
+            &#10060; Invalid email or password.
           </p>
         </div>
         <button
@@ -1041,7 +1014,7 @@
             onclick="showPage('signup')"
             class="text-gold font-semibold bg-transparent border-none cursor-pointer hover:underline"
           >
-            Create an account →
+            Create an account &#8594;
           </button>
         </p>
         <p class="text-center mt-2.5">
@@ -1049,13 +1022,13 @@
             onclick="showPage('landing')"
             class="text-xs text-gray-600 bg-transparent border-none cursor-pointer hover:text-gray-400"
           >
-            ← Back to Home
+            &#8592; Back to Home
           </button>
         </p>
       </div>
     </div>
 
-    <!-- ══════════════ SIGN UP ══════════════ -->
+    <!-- SIGN UP -->
     <div
       id="page-signup"
       class="hidden min-h-screen bg-dark-bg flex items-center justify-center px-4 pt-20 pb-10"
@@ -1066,7 +1039,7 @@
         <div
           class="font-anton text-2xl tracking-[3px] text-gold text-center mb-1"
         >
-          🃏 BET MAFIA
+          &#127183; BET MAFIA
         </div>
         <div
           class="text-11 text-gray-500 tracking-[2px] uppercase text-center mb-8"
@@ -1080,8 +1053,7 @@
           <label
             class="block text-11 font-semibold tracking-widest uppercase text-gray-500 mb-2"
             >Full Name</label
-          >
-          <input
+          ><input
             id="signup-name"
             type="text"
             placeholder="Your name"
@@ -1092,8 +1064,7 @@
           <label
             class="block text-11 font-semibold tracking-widest uppercase text-gray-500 mb-2"
             >Email Address</label
-          >
-          <input
+          ><input
             id="signup-email"
             type="email"
             placeholder="you@example.com"
@@ -1109,7 +1080,7 @@
             id="signup-country"
             class="w-full bg-dark-card2 border border-dark-border2 text-gray-100 px-4 py-3 rounded text-[14px] outline-none focus:border-gold transition-colors appearance-none cursor-pointer"
           >
-            <option value="">Select your country…</option>
+            <option value="">Select your country&#8230;</option>
             <option>United States</option>
             <option>Canada</option>
             <option>United Kingdom</option>
@@ -1141,7 +1112,7 @@
             id="signup-sbook"
             class="w-full bg-dark-card2 border border-dark-border2 text-gray-100 px-4 py-3 rounded text-[14px] outline-none focus:border-gold transition-colors appearance-none cursor-pointer"
           >
-            <option value="">Select sportsbook…</option>
+            <option value="">Select sportsbook&#8230;</option>
             <option>FanDuel</option>
             <option>DraftKings</option>
             <option>BetMGM</option>
@@ -1161,8 +1132,7 @@
           <label
             class="block text-11 font-semibold tracking-widest uppercase text-gray-500 mb-2"
             >Password</label
-          >
-          <input
+          ><input
             id="signup-pass"
             type="password"
             placeholder="Min 6 characters"
@@ -1173,8 +1143,7 @@
           <label
             class="block text-11 font-semibold tracking-widest uppercase text-gray-500 mb-2"
             >Confirm Password</label
-          >
-          <input
+          ><input
             id="signup-pass2"
             type="password"
             placeholder="Re-enter password"
@@ -1185,8 +1154,8 @@
             id="signup-error"
             class="hidden text-red text-xs mt-1.5 font-medium"
           >
-            ❌ Please fill in all fields (password min 6 chars, passwords must
-            match).
+            &#10060; Please fill in all fields (password min 6 chars, passwords
+            must match).
           </p>
         </div>
         <button
@@ -1201,7 +1170,7 @@
             onclick="showPage('signin')"
             class="text-gold font-semibold bg-transparent border-none cursor-pointer hover:underline"
           >
-            Sign in →
+            Sign in &#8594;
           </button>
         </p>
         <p class="text-center mt-2.5">
@@ -1209,13 +1178,13 @@
             onclick="showPage('landing')"
             class="text-xs text-gray-600 bg-transparent border-none cursor-pointer hover:text-gray-400"
           >
-            ← Back to Home
+            &#8592; Back to Home
           </button>
         </p>
       </div>
     </div>
 
-    <!-- ══════════════ CHOOSE PLAN ══════════════ -->
+    <!-- CHOOSE PLAN -->
     <div
       id="page-choose-plan"
       class="hidden min-h-screen bg-dark-bg pt-24 pb-16 px-4"
@@ -1225,7 +1194,7 @@
           <div
             class="inline-block bg-red/15 border border-red text-red px-4 py-1.5 rounded-sm text-11 font-bold tracking-[3px] uppercase mb-4"
           >
-            Step 1 — Choose Your Plan
+            Step 1 &#8212; Choose Your Plan
           </div>
           <h2
             class="font-anton text-3xl md:text-5xl tracking-widest text-gray-100"
@@ -1242,13 +1211,13 @@
             onclick="showPage('landing')"
             class="text-gray-500 text-13 bg-transparent border-none cursor-pointer hover:text-gray-300"
           >
-            ← Back to Home
+            &#8592; Back to Home
           </button>
         </p>
       </div>
     </div>
 
-    <!-- ══════════════ DASHBOARD ══════════════ -->
+    <!-- DASHBOARD -->
     <div id="page-dashboard" class="hidden pt-16 min-h-screen bg-dark-bg">
       <div class="max-w-5xl mx-auto px-4 md:px-10 py-9">
         <p class="text-11 text-gray-500 tracking-[2px] uppercase mb-1.5">
@@ -1257,7 +1226,8 @@
         <h2
           class="font-anton text-2xl md:text-4xl tracking-widest text-gray-100 mb-7"
         >
-          Hey, <span id="dash-username" class="text-gold">Member</span> 👊
+          Hey,
+          <span id="dash-username" class="text-gold">Member</span> &#128074;
         </h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-7">
           <div
@@ -1286,7 +1256,9 @@
             >
               No Active Plan
             </div>
-            <div class="text-11 text-gray-500 mt-1" id="dash-expires">—</div>
+            <div class="text-11 text-gray-500 mt-1" id="dash-expires">
+              &#8212;
+            </div>
           </div>
           <div
             class="bg-dark-card border border-dark-border2 rounded-lg p-4 md:p-5"
@@ -1298,7 +1270,7 @@
               class="font-anton text-xl md:text-2xl text-green-400"
               id="dash-pkg-balance"
             >
-              —
+              &#8212;
             </div>
             <div class="text-11 text-gray-500 mt-1">Days remaining</div>
           </div>
@@ -1312,7 +1284,7 @@
               class="font-anton text-base md:text-xl text-gray-100 mt-1"
               id="dash-picks-count"
             >
-              🔒 0
+              &#128274; 0
             </div>
             <div class="text-11 text-gray-500 mt-1">Subscribe to unlock</div>
           </div>
@@ -1332,7 +1304,7 @@
             onclick="openPaymentModal()"
             class="bg-gold text-black px-8 py-3 rounded font-bold text-13 tracking-[2px] uppercase hover:bg-gold-light transition-all"
           >
-            Subscribe Now →
+            Subscribe Now &#8594;
           </button>
         </div>
         <h3 class="font-anton text-xl tracking-wide text-gray-100 mb-4">
@@ -1345,19 +1317,25 @@
             onclick="openPaymentModal()"
             class="bg-gold text-black px-8 md:px-10 py-4 rounded font-bold text-[13px] md:text-[14px] tracking-[2px] uppercase hover:bg-gold-light transition-all"
           >
-            🔐 Subscribe Now — Unlock All Picks
+            &#128272; Subscribe Now &#8212; Unlock All Picks
+          </button>
+          <button
+            onclick="openWithdrawModal()"
+            class="border border-gold/70 text-gold px-8 md:px-10 py-4 rounded font-bold text-[13px] md:text-[14px] tracking-[2px] uppercase hover:bg-gold/10 transition-all"
+          >
+            &#128181; Withdraw
           </button>
           <button
             onclick="showPage('landing')"
-            class="border border-gold text-gold px-6 py-4 rounded font-semibold text-13 uppercase tracking-widest hover:bg-gold hover:text-black transition-all"
+            class="border border-dark-border2 text-gray-400 px-6 py-4 rounded font-semibold text-13 uppercase tracking-widest hover:border-gold hover:text-gold transition-all"
           >
-            🏠 Back to Home
+            &#127968; Back to Home
           </button>
         </div>
       </div>
     </div>
 
-    <!-- ══════════════ PAYMENT MODAL ══════════════ -->
+    <!-- PAYMENT MODAL -->
     <div
       id="payment-modal"
       class="hidden fixed inset-0 z-[300] bg-black/88 flex items-center justify-center p-4"
@@ -1377,7 +1355,7 @@
             onclick="closePaymentModal()"
             class="text-gray-500 hover:text-gray-100 text-xl bg-transparent border-none cursor-pointer w-8 h-8 flex items-center justify-center rounded hover:bg-white/10 transition-all"
           >
-            ✕
+            &#10005;
           </button>
         </div>
         <div class="px-6 py-6">
@@ -1414,35 +1392,35 @@
             class="bg-dark-card2 border border-dark-border2 rounded-lg p-4 mb-4 text-13 leading-loose"
           >
             <span class="text-gray-500 text-xs"
-              >👆 Select a payment method above to see details</span
+              >&#128070; Select a payment method above to see details</span
             >
           </div>
           <div class="bg-red/7 border border-red/22 rounded-lg p-4 mb-5">
             <p class="text-xs text-gray-400 leading-relaxed">
-              <strong class="text-red">⚠️ IMPORTANT:</strong> After payment,
-              send a screenshot to our admin to activate your account.
+              <strong class="text-red">&#9888;&#65039; IMPORTANT:</strong> After
+              payment, send a screenshot to our admin to activate your account.
             </p>
             <span class="block text-gold text-xs font-semibold mt-2"
-              >💬 Discord: discord.gg/betmafia → #payments</span
+              >&#128172; Discord: discord.gg/betmafia &#8594; #payments</span
             >
             <span class="block text-gold text-xs font-semibold mt-1"
-              >📧 admin@betmafia.vip</span
+              >&#128231; admin@betmafia.vip</span
             >
             <p class="text-11 text-gray-500 mt-2">
-              Include your email. Activated within 1–2 hours.
+              Include your email. Activated within 1&#8211;2 hours.
             </p>
           </div>
           <button
             onclick="confirmPayment()"
             class="w-full bg-gold text-black py-3.5 rounded font-bold text-13 tracking-[2px] uppercase hover:bg-gold-light transition-all"
           >
-            I've Sent the Payment — Notify Admin
+            I've Sent the Payment &#8212; Notify Admin
           </button>
         </div>
       </div>
     </div>
 
-    <!-- ══════════════ SUCCESS MODAL ══════════════ -->
+    <!-- SUCCESS MODAL -->
     <div
       id="success-modal"
       class="hidden fixed inset-0 z-[300] bg-black/88 flex items-center justify-center p-4"
@@ -1451,7 +1429,7 @@
         class="bg-dark-card border border-dark-border2 rounded-xl w-full max-w-md"
       >
         <div class="text-center p-10 md:p-12">
-          <div class="text-5xl mb-5">✅</div>
+          <div class="text-5xl mb-5">&#9989;</div>
           <h3 class="font-anton text-2xl tracking-widest mb-3">
             You're In, <span class="text-gold">Fam</span>
           </h3>
@@ -1459,11 +1437,282 @@
             Send your screenshot to
             <strong class="text-gold">#payments</strong> on Discord at
             <strong class="text-gold">discord.gg/betmafia</strong>. Activated
-            within 1–2 hours. Welcome to the family. 🃏
+            within 1&#8211;2 hours. Welcome to the family. &#127183;
           </p>
           <button
             onclick="closeSuccessModal()"
             class="mt-7 bg-gold text-black px-8 py-3 rounded font-bold text-13 tracking-[2px] uppercase hover:bg-gold-light transition-all"
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ WITHDRAW MODAL ══════════════ -->
+    <div
+      id="withdraw-modal"
+      class="hidden fixed inset-0 z-[300] bg-black/88 flex items-center justify-center p-4"
+      onclick="handleWithdrawBg(event)"
+    >
+      <div
+        class="bg-dark-card border border-dark-border2 rounded-xl w-full max-w-md"
+        onclick="event.stopPropagation()"
+      >
+        <!-- Header -->
+        <div
+          class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-dark-border2"
+        >
+          <div>
+            <h3 class="font-anton text-xl tracking-wide text-gray-100">
+              &#128181; Withdraw Funds
+            </h3>
+            <p class="text-11 text-gray-500 mt-0.5">
+              Request a payout to your account
+            </p>
+          </div>
+          <button
+            onclick="closeWithdrawModal()"
+            class="text-gray-500 hover:text-gray-100 text-xl bg-transparent border-none cursor-pointer w-8 h-8 flex items-center justify-center rounded hover:bg-white/10 transition-all"
+          >
+            &#10005;
+          </button>
+        </div>
+
+        <!-- STEP 1: Form -->
+        <div id="wd-step-form" class="px-6 py-6">
+          <!-- Balance -->
+          <div
+            class="flex items-center justify-between bg-gold/8 border border-gold/25 rounded-lg px-4 py-3 mb-6"
+          >
+            <span
+              class="text-11 text-gray-400 uppercase tracking-widest font-semibold"
+              >Available Balance</span
+            >
+            <span class="font-anton text-xl text-gold" id="wd-balance-display"
+              >$0.00</span
+            >
+          </div>
+          <!-- Name (readonly) -->
+          <div class="mb-4">
+            <label
+              class="block text-11 font-semibold tracking-widest uppercase text-gray-500 mb-2"
+              >Full Name</label
+            >
+            <input
+              id="wd-name"
+              type="text"
+              readonly
+              class="w-full bg-dark-card2 border border-dark-border2 text-gray-400 px-4 py-3 rounded text-[14px] outline-none opacity-60 cursor-not-allowed"
+            />
+          </div>
+          <!-- Amount -->
+          <div class="mb-4">
+            <label
+              class="block text-11 font-semibold tracking-widest uppercase text-gray-500 mb-2"
+              >Withdrawal Amount ($)</label
+            >
+            <input
+              id="wd-amount"
+              type="number"
+              min="1"
+              placeholder="Enter amount"
+              class="w-full bg-dark-card2 border border-dark-border2 text-gray-100 px-4 py-3 rounded text-[14px] outline-none focus:border-gold transition-colors placeholder-gray-600"
+            />
+          </div>
+          <!-- Method -->
+          <div class="mb-4">
+            <label
+              class="block text-11 font-semibold tracking-widest uppercase text-gray-500 mb-2"
+              >Preferred Receiving Method</label
+            >
+            <select
+              id="wd-method"
+              class="w-full bg-dark-card2 border border-dark-border2 text-gray-100 px-4 py-3 rounded text-[14px] outline-none focus:border-gold transition-colors appearance-none cursor-pointer"
+            >
+              <option value="">Select method&#8230;</option>
+              <option value="cashapp">&#128181; Cash App</option>
+              <option value="zelle">&#128154; Zelle</option>
+              <option value="apple">&#127822; Apple Pay</option>
+              <option value="chime">&#128155; Chime</option>
+              <option value="paypal">&#128309; PayPal</option>
+              <option value="other">&#128203; Other</option>
+            </select>
+          </div>
+          <!-- Details -->
+          <div class="mb-6">
+            <label
+              class="block text-11 font-semibold tracking-widest uppercase text-gray-500 mb-2"
+              >Receiving Details</label
+            >
+            <input
+              id="wd-details"
+              type="text"
+              placeholder="e.g. $YourCashtag, phone, or email"
+              class="w-full bg-dark-card2 border border-dark-border2 text-gray-100 px-4 py-3 rounded text-[14px] outline-none focus:border-gold transition-colors placeholder-gray-600"
+            />
+            <p class="text-11 text-gray-600 mt-1.5">
+              Your cashtag, number, or email for the chosen method
+            </p>
+          </div>
+          <p
+            id="wd-form-error"
+            class="hidden text-red text-xs mb-3 font-medium"
+          >
+            &#10060; Please fill in all fields.
+          </p>
+          <button
+            onclick="submitWithdrawForm()"
+            class="w-full bg-gold text-black py-3.5 rounded font-bold text-13 tracking-[2px] uppercase hover:bg-gold-light transition-all"
+          >
+            Continue to Authorization &#8594;
+          </button>
+        </div>
+
+        <!-- STEP 2: PIN -->
+        <div id="wd-step-pin" class="hidden px-6 py-6">
+          <!-- Summary -->
+          <div
+            id="wd-pin-summary"
+            class="bg-dark-card2 border border-dark-border2 rounded-lg px-4 py-3 mb-6 text-13 text-gray-400 leading-loose"
+          ></div>
+          <div class="text-center mb-7">
+            <p
+              class="text-11 text-gold font-bold tracking-[4px] uppercase mb-1"
+            >
+              Authorization Required
+            </p>
+            <p class="text-gray-400 text-13">Enter your 4-digit security PIN</p>
+          </div>
+          <!-- PIN dots -->
+          <div id="pin-dots" class="flex justify-center gap-5 mb-8">
+            <div
+              id="dot-0"
+              class="w-4 h-4 rounded-full border-2 border-dark-border2 bg-transparent transition-all duration-150"
+            ></div>
+            <div
+              id="dot-1"
+              class="w-4 h-4 rounded-full border-2 border-dark-border2 bg-transparent transition-all duration-150"
+            ></div>
+            <div
+              id="dot-2"
+              class="w-4 h-4 rounded-full border-2 border-dark-border2 bg-transparent transition-all duration-150"
+            ></div>
+            <div
+              id="dot-3"
+              class="w-4 h-4 rounded-full border-2 border-dark-border2 bg-transparent transition-all duration-150"
+            ></div>
+          </div>
+          <!-- Numpad -->
+          <div class="grid grid-cols-3 gap-3 mb-4">
+            <button
+              onclick="pinPress('1')"
+              class="bg-dark-card2 border border-dark-border2 rounded-lg py-4 font-anton text-2xl text-gray-100 hover:border-gold hover:text-gold hover:bg-gold/5 transition-all active:scale-95 select-none"
+            >
+              1
+            </button>
+            <button
+              onclick="pinPress('2')"
+              class="bg-dark-card2 border border-dark-border2 rounded-lg py-4 font-anton text-2xl text-gray-100 hover:border-gold hover:text-gold hover:bg-gold/5 transition-all active:scale-95 select-none"
+            >
+              2
+            </button>
+            <button
+              onclick="pinPress('3')"
+              class="bg-dark-card2 border border-dark-border2 rounded-lg py-4 font-anton text-2xl text-gray-100 hover:border-gold hover:text-gold hover:bg-gold/5 transition-all active:scale-95 select-none"
+            >
+              3
+            </button>
+            <button
+              onclick="pinPress('4')"
+              class="bg-dark-card2 border border-dark-border2 rounded-lg py-4 font-anton text-2xl text-gray-100 hover:border-gold hover:text-gold hover:bg-gold/5 transition-all active:scale-95 select-none"
+            >
+              4
+            </button>
+            <button
+              onclick="pinPress('5')"
+              class="bg-dark-card2 border border-dark-border2 rounded-lg py-4 font-anton text-2xl text-gray-100 hover:border-gold hover:text-gold hover:bg-gold/5 transition-all active:scale-95 select-none"
+            >
+              5
+            </button>
+            <button
+              onclick="pinPress('6')"
+              class="bg-dark-card2 border border-dark-border2 rounded-lg py-4 font-anton text-2xl text-gray-100 hover:border-gold hover:text-gold hover:bg-gold/5 transition-all active:scale-95 select-none"
+            >
+              6
+            </button>
+            <button
+              onclick="pinPress('7')"
+              class="bg-dark-card2 border border-dark-border2 rounded-lg py-4 font-anton text-2xl text-gray-100 hover:border-gold hover:text-gold hover:bg-gold/5 transition-all active:scale-95 select-none"
+            >
+              7
+            </button>
+            <button
+              onclick="pinPress('8')"
+              class="bg-dark-card2 border border-dark-border2 rounded-lg py-4 font-anton text-2xl text-gray-100 hover:border-gold hover:text-gold hover:bg-gold/5 transition-all active:scale-95 select-none"
+            >
+              8
+            </button>
+            <button
+              onclick="pinPress('9')"
+              class="bg-dark-card2 border border-dark-border2 rounded-lg py-4 font-anton text-2xl text-gray-100 hover:border-gold hover:text-gold hover:bg-gold/5 transition-all active:scale-95 select-none"
+            >
+              9
+            </button>
+            <button
+              onclick="pinClear()"
+              class="bg-dark-card2 border border-dark-border2 rounded-lg py-4 text-gray-500 hover:border-red/60 hover:text-red hover:bg-red/5 transition-all active:scale-95 text-12 font-bold uppercase tracking-widest select-none"
+            >
+              CLR
+            </button>
+            <button
+              onclick="pinPress('0')"
+              class="bg-dark-card2 border border-dark-border2 rounded-lg py-4 font-anton text-2xl text-gray-100 hover:border-gold hover:text-gold hover:bg-gold/5 transition-all active:scale-95 select-none"
+            >
+              0
+            </button>
+            <button
+              onclick="pinBackspace()"
+              class="bg-dark-card2 border border-dark-border2 rounded-lg py-4 text-gray-400 hover:border-gold hover:text-gold hover:bg-gold/5 transition-all active:scale-95 text-xl select-none"
+            >
+              &#9003;
+            </button>
+          </div>
+          <p
+            id="pin-error"
+            class="hidden text-red text-xs text-center mb-3 font-medium"
+          >
+            &#10060; Incorrect PIN. Please try again.
+          </p>
+          <button
+            onclick="goBackToWithdrawForm()"
+            class="w-full text-gray-500 text-13 bg-transparent border-none cursor-pointer hover:text-gray-300 py-2 mt-1"
+          >
+            &#8592; Back
+          </button>
+        </div>
+
+        <!-- STEP 3: Success -->
+        <div id="wd-step-success" class="hidden px-6 py-12 text-center">
+          <div
+            class="w-16 h-16 rounded-full bg-green-900/30 border border-green-700/40 flex items-center justify-center mx-auto mb-5 text-3xl"
+          >
+            &#9989;
+          </div>
+          <h3 class="font-anton text-2xl tracking-widest mb-2">
+            Request <span class="text-gold">Submitted</span>
+          </h3>
+          <p
+            class="text-gray-400 text-13 leading-relaxed max-w-xs mx-auto mb-1"
+          >
+            Your withdrawal has been submitted and is pending admin review.
+          </p>
+          <p class="text-gold text-11 font-bold tracking-[2px] uppercase mb-8">
+            Processing within 24&#8211;48 hours
+          </p>
+          <button
+            onclick="closeWithdrawModal()"
+            class="bg-gold text-black px-8 py-3.5 rounded font-bold text-13 tracking-[2px] uppercase hover:bg-gold-light transition-all"
           >
             Back to Dashboard
           </button>
@@ -1477,1159 +1726,12 @@
       class="fixed bottom-6 right-6 z-[999] bg-dark-card border border-gold text-gray-100 px-5 py-3.5 rounded-lg text-13 max-w-[calc(100vw-3rem)] transition-all duration-300 opacity-0 translate-y-16 pointer-events-none shadow-lg"
     ></div>
 
-    <!-- Win notification popup -->
+    <!-- Win popup -->
     <div
       id="win-popup"
       class="fixed bottom-6 left-4 z-[998] w-[min(300px,calc(100vw-2rem))] hidden"
     ></div>
 
-    <!-- ══════════════ JAVASCRIPT ══════════════ -->
-    <script>
-      var PLANS = [
-        {
-          name: "5-Day Trial",
-          price: 80,
-          duration: "5 Days Access",
-          featured: false,
-          feats: [
-            "Daily VIP picks (all sports)",
-            "Injury & lineup intel",
-            "Private Discord access",
-            "Same-day release",
-          ],
-        },
-        {
-          name: "Weekly",
-          price: 150,
-          duration: "7 Days Access",
-          featured: false,
-          feats: [
-            "Daily VIP picks (all sports)",
-            "Injury & lineup intel",
-            "Private Discord access",
-            "Same-day release",
-            "Parlay of the week",
-          ],
-        },
-        {
-          name: "Monthly",
-          price: 300,
-          duration: "30 Days Access",
-          featured: true,
-          feats: [
-            "Daily VIP picks (all sports)",
-            "Injury & lineup intel",
-            "Private Discord access",
-            "Same-day release",
-            "Parlay of the week",
-            "1-on-1 capper consult",
-            "Exclusive monthly locks",
-          ],
-        },
-        {
-          name: "Lifetime",
-          price: 1000,
-          duration: "Forever Access",
-          featured: false,
-          feats: [
-            "Everything in Monthly",
-            "Lifetime VIP status",
-            "First pick every day",
-            "Direct capper hotline",
-            "All future upgrades free",
-            "Founding member badge",
-          ],
-        },
-      ];
-      var SBOOKS = [
-        { name: "FanDuel", icon: "🎯", rate: 91 },
-        { name: "DraftKings", icon: "👑", rate: 89 },
-        { name: "BetMGM", icon: "🎰", rate: 87 },
-        { name: "PrizePicks", icon: "🏆", rate: 93 },
-        { name: "Underdog", icon: "🐶", rate: 88 },
-        { name: "BetWay", icon: "⚡", rate: 85 },
-        { name: "Bet365", icon: "🌐", rate: 86 },
-        { name: "Bovada", icon: "🐂", rate: 84 },
-        { name: "PointsBet", icon: "📍", rate: 83 },
-        { name: "Others", icon: "📊", rate: 82 },
-      ];
-      var TESTIS = [
-        {
-          initials: "MJ",
-          name: "Marcus J.",
-          tag: "Monthly · Atlanta, GA",
-          win: "+$2,400 this month",
-          stars: 5,
-          text: "Bet Mafia changed my whole perspective on sports betting. Three weeks into the monthly plan and I've already made back my subscription fee 8 times over. These guys are on another level.",
-        },
-        {
-          initials: "TR",
-          name: "Tony R.",
-          tag: "Lifetime · Miami, FL",
-          win: "7/9 on FanDuel locks",
-          stars: 5,
-          text: "Hit 7 of the last 9 locks they posted on FanDuel. The intel these guys drop on injuries alone is worth the price. My sportsbook account is up $4K since I joined. 10/10.",
-        },
-        {
-          initials: "DS",
-          name: "Darius S.",
-          tag: "Lifetime · Chicago, IL",
-          win: "Upgraded after day 3",
-          stars: 5,
-          text: "Started with the 5-day trial just to test it. Ended up going straight to lifetime after day 3. The Discord server is super active, real professionals dropping knowledge all day.",
-        },
-        {
-          initials: "KW",
-          name: "Kevin W.",
-          tag: "Monthly · Houston, TX",
-          win: "3x 4-pick power play",
-          stars: 5,
-          text: "The PrizePicks props they send daily are insane. Hit a 4-pick power play three times this month. Wifey asked where the money was coming from. Bet Mafia is my silent income stream.",
-        },
-        {
-          initials: "AV",
-          name: "Aaliyah V.",
-          tag: "Monthly · Las Vegas, NV",
-          win: "14/18 first month",
-          stars: 5,
-          text: "As a woman in betting I was skeptical. But they treat everyone the same and the picks are just facts. 14 out of 18 picks my first month on DraftKings. Renewed immediately.",
-        },
-        {
-          initials: "RB",
-          name: "Rico B.",
-          tag: "Lifetime · New York, NY",
-          win: "Full-time bettor",
-          stars: 5,
-          text: "I do this full time now. The sharp line moves they track on BetMGM before the public even knows — that's where the real edge is. Recommended to 3 of my boys, all monthly members now.",
-        },
-      ];
-      var WIN_NOTIFS = [
-        {
-          name: "Garia M.",
-          amount: "$600",
-          book: "FanDuel",
-          sport: "🏀 NBA Props",
-          time: "2m ago",
-        },
-        {
-          name: "DeShawn T.",
-          amount: "$1,240",
-          book: "PrizePicks",
-          sport: "🏈 NFL Parlay",
-          time: "5m ago",
-        },
-        {
-          name: "Keisha R.",
-          amount: "$380",
-          book: "DraftKings",
-          sport: "⚾ MLB Run Line",
-          time: "8m ago",
-        },
-        {
-          name: "Marcus L.",
-          amount: "$750",
-          book: "Underdog Fantasy",
-          sport: "🏀 NBA Power Play",
-          time: "11m ago",
-        },
-        {
-          name: "Tyrone B.",
-          amount: "$2,100",
-          book: "FanDuel",
-          sport: "🥊 UFC Main Event",
-          time: "14m ago",
-        },
-        {
-          name: "Aaliyah F.",
-          amount: "$490",
-          book: "BetMGM",
-          sport: "🏀 NBA Spread",
-          time: "17m ago",
-        },
-        {
-          name: "Carlos M.",
-          amount: "$870",
-          book: "Bet365",
-          sport: "⚽ Soccer Parlay",
-          time: "20m ago",
-        },
-        {
-          name: "Jordan K.",
-          amount: "$1,500",
-          book: "DraftKings",
-          sport: "🏈 NFL Sunday Lock",
-          time: "23m ago",
-        },
-        {
-          name: "Brianna T.",
-          amount: "$310",
-          book: "PrizePicks",
-          sport: "🎓 NCAAB Props",
-          time: "26m ago",
-        },
-        {
-          name: "Raheem A.",
-          amount: "$960",
-          book: "Caesars",
-          sport: "🏒 NHL Total",
-          time: "29m ago",
-        },
-      ];
-      var DASH_PICKS = [
-        {
-          sport: "NBA · Tonight 7:30 PM",
-          match: "Lakers vs Celtics",
-          badge: "🔥 Hot",
-          badgeClass: "bg-red/15 text-red border border-red/30",
-          lock: true,
-        },
-        {
-          sport: "NFL · Sunday 4:25 PM",
-          match: "Chiefs vs Ravens",
-          badge: "🔐 Lock",
-          badgeClass: "bg-gold/10 text-gold border border-gold/30",
-          lock: true,
-        },
-        {
-          sport: "MLB · Tonight 8:05 PM",
-          match: "Yankees vs Dodgers",
-          badge: "🔥 Hot",
-          badgeClass: "bg-red/15 text-red border border-red/30",
-          lock: true,
-        },
-        {
-          sport: "PrizePicks · Props",
-          match: "NBA Player Props — 4-Pick",
-          badge: "🔐 Lock",
-          badgeClass: "bg-gold/10 text-gold border border-gold/30",
-          lock: true,
-        },
-      ];
-      var PICKS_UNLOCKED = [
-        { bet: "✅ Lakers -4.5 | Under 228.5", odds: "-110" },
-        { bet: "✅ Chiefs ML | Ravens -6", odds: "-115" },
-        { bet: "✅ Dodgers ML | Over 8.5 Runs", odds: "+120" },
-        {
-          bet: "✅ LeBron O25.5 | Curry O4.5 3PM | AD O9.5 | Tatum O28.5",
-          odds: "10x",
-        },
-      ];
-      var PAY_METHODS = [
-        {
-          id: "zelle",
-          icon: "💚",
-          name: "Zelle",
-          info: 'Send to: <span class="text-gold font-semibold">betmafia@zelle.com</span><br>Name: Bet Mafia VIP<br>Note: Your name + plan',
-        },
-        {
-          id: "chime",
-          icon: "💛",
-          name: "Chime",
-          info: 'Send to: <span class="text-gold font-semibold">$BetMafiaVIP</span><br>Include your email in the memo field',
-        },
-        {
-          id: "apple",
-          icon: "🍎",
-          name: "Apple Pay",
-          info: 'Send to: <span class="text-gold font-semibold">+1 (702) 555-0198</span><br>Name: Bet Mafia Admin<br>Note: VIP Plan + your email',
-        },
-        {
-          id: "bitcoin",
-          icon: "₿",
-          name: "Bitcoin",
-          info: 'BTC: <span class="text-gold font-semibold break-all">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</span><br>Include email in note if wallet allows.',
-        },
-        {
-          id: "cashapp",
-          icon: "💵",
-          name: "Cash App",
-          info: 'Cashtag: <span class="text-gold font-semibold">$BetMafiaVIP</span><br>Include your name and plan in the note',
-        },
-        {
-          id: "paypal",
-          icon: "🔵",
-          name: "PayPal",
-          info: 'Send to: <span class="text-gold font-semibold">payments@betmafia.vip</span><br>Friends &amp; Family ONLY',
-        },
-      ];
-      var SPORTS = [
-        {
-          id: "nba",
-          label: "NBA",
-          icon: "🏀",
-          name: "NBA Basketball",
-          tag: "Daily Picks · All Season Long",
-          desc: "The NBA is our bread and butter. Our cappers track every rotation change, rest-day pattern, back-to-back fatigue, and line movement in real time.",
-          stats: [
-            { v: "93%", l: "Win Rate" },
-            { v: "Daily", l: "Picks" },
-            { v: "30", l: "Teams" },
-            { v: "4", l: "Bet Types" },
-          ],
-        },
-        {
-          id: "nfl",
-          label: "NFL",
-          icon: "🏈",
-          name: "NFL Football",
-          tag: "Biggest Betting Market in the World",
-          desc: "Every injury report, coaching tendency, weather condition, and divisional matchup — dissected from Thursday Night through Monday Night.",
-          stats: [
-            { v: "89%", l: "Win Rate" },
-            { v: "Weekly", l: "Picks" },
-            { v: "32", l: "Teams" },
-            { v: "18", l: "Weeks" },
-          ],
-        },
-        {
-          id: "mlb",
-          label: "MLB",
-          icon: "⚾",
-          name: "MLB Baseball",
-          tag: "162-Game Season. Endless Edges.",
-          desc: "With 162 games per team the slate is packed with value every night. We focus on starting pitcher matchups, bullpen depth, park factors, platoon splits, and umpire tendencies.",
-          stats: [
-            { v: "87%", l: "Win Rate" },
-            { v: "Daily", l: "Picks" },
-            { v: "30", l: "Teams" },
-            { v: "162", l: "Games/Season" },
-          ],
-        },
-        {
-          id: "nhl",
-          label: "NHL",
-          icon: "🏒",
-          name: "NHL Hockey",
-          tag: "Underrated Market. Massive Value.",
-          desc: "One of the most undervalued markets in sports. Goalie matchups, power play percentages, travel schedules, and home ice — our cappers have been exploiting NHL edges for years.",
-          stats: [
-            { v: "85%", l: "Win Rate" },
-            { v: "Daily", l: "Picks" },
-            { v: "32", l: "Teams" },
-            { v: "82", l: "Games/Season" },
-          ],
-        },
-        {
-          id: "ufc",
-          label: "UFC / MMA",
-          icon: "🥊",
-          name: "UFC & MMA",
-          tag: "Fight Night Intelligence",
-          desc: "MMA is the most volatile — and most profitable — sport when you have the right intel. Our analysts study striking stats, grappling efficiency, cardio rates, and training camp reports.",
-          stats: [
-            { v: "82%", l: "Win Rate" },
-            { v: "Per Event", l: "Picks" },
-            { v: "All", l: "Promotions" },
-            { v: "Full", l: "Card Coverage" },
-          ],
-        },
-        {
-          id: "nba-props",
-          label: "PrizePicks",
-          icon: "🏆",
-          name: "PrizePicks Props",
-          tag: "Power Plays · Flex · Daily Value",
-          desc: "Our highest win-rate product. Daily 4-pick Power Plays and Flex entries with confidence ratings.",
-          stats: [
-            { v: "93%", l: "Win Rate" },
-            { v: "Daily", l: "Entries" },
-            { v: "4-Pick", l: "Power Plays" },
-            { v: "All", l: "Sports" },
-          ],
-        },
-        {
-          id: "ncaab",
-          label: "College B-Ball",
-          icon: "🎓",
-          name: "College Basketball (NCAAB)",
-          tag: "March Madness Year-Round Edge",
-          desc: "Some of the softest lines in all of sports betting. We monitor coaching tendencies, recruiting momentum, home court energy, and post-conference tournament form.",
-          stats: [
-            { v: "86%", l: "Win Rate" },
-            { v: "Daily", l: "Picks" },
-            { v: "350+", l: "Teams" },
-            { v: "March", l: "Madness" },
-          ],
-        },
-        {
-          id: "ncaaf",
-          label: "College FB",
-          icon: "🏟️",
-          name: "College Football (NCAAF)",
-          tag: "Saturday is Payday",
-          desc: "130+ FBS teams, massive point spreads, and market inefficiencies every Saturday.",
-          stats: [
-            { v: "84%", l: "Win Rate" },
-            { v: "Weekly", l: "Picks" },
-            { v: "130+", l: "Teams" },
-            { v: "Bowls", l: "Covered" },
-          ],
-        },
-        {
-          id: "soccer",
-          label: "Soccer",
-          icon: "⚽",
-          name: "Soccer (MLS & International)",
-          tag: "The Beautiful Game. Beautiful Returns.",
-          desc: "From the Premier League to Champions League to MLS. We focus on team form, xG data, manager rotations, and fatigue.",
-          stats: [
-            { v: "83%", l: "Win Rate" },
-            { v: "Daily", l: "Picks" },
-            { v: "10+", l: "Leagues" },
-            { v: "All", l: "Markets" },
-          ],
-        },
-        {
-          id: "tennis",
-          label: "Tennis",
-          icon: "🎾",
-          name: "Tennis",
-          tag: "Aces, Upsets & Massive Value",
-          desc: "Head-to-head matchups, surface preferences, player fitness, and serve efficiency create enormous daily edges.",
-          stats: [
-            { v: "80%", l: "Win Rate" },
-            { v: "Daily", l: "Picks" },
-            { v: "4", l: "Grand Slams" },
-            { v: "ATP & WTA", l: "Covered" },
-          ],
-        },
-        {
-          id: "golf",
-          label: "Golf",
-          icon: "⛳",
-          name: "Golf / PGA Tour",
-          tag: "Outright Winners & Top-10 Value",
-          desc: "Course history, strokes gained metrics, driving accuracy setups, and player form over the last 10 rounds.",
-          stats: [
-            { v: "78%", l: "Win Rate" },
-            { v: "Weekly", l: "Picks" },
-            { v: "PGA & DP", l: "Tours" },
-            { v: "Outrights", l: "& H2H" },
-          ],
-        },
-        {
-          id: "esports",
-          label: "Esports",
-          icon: "🎮",
-          name: "Esports",
-          tag: "The Fastest-Growing Betting Market",
-          desc: "CS2, League of Legends, Valorant, and Dota 2 at the highest competitive levels.",
-          stats: [
-            { v: "81%", l: "Win Rate" },
-            { v: "Daily", l: "Picks" },
-            { v: "4+", l: "Titles" },
-            { v: "Global", l: "Tournaments" },
-          ],
-        },
-      ];
-
-      // ── State ──
-      var currentUser = null;
-      var selectedPayMethod = "";
-      var activeSportId = null;
-
-      // ── Toast ──
-      var toastTimer;
-      function showToast(msg) {
-        var t = document.getElementById("toast");
-        t.textContent = msg;
-        t.classList.remove(
-          "opacity-0",
-          "translate-y-16",
-          "pointer-events-none",
-        );
-        t.classList.add("opacity-100", "translate-y-0");
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(function () {
-          t.classList.remove("opacity-100", "translate-y-0");
-          t.classList.add("opacity-0", "translate-y-16", "pointer-events-none");
-        }, 3200);
-      }
-
-      // ── Win popup ──
-      var winIdx = 0,
-        winActive = false;
-      function showNextWin() {
-        if (winActive) return;
-        var notif = WIN_NOTIFS[winIdx % WIN_NOTIFS.length];
-        winIdx++;
-        winActive = true;
-        var c = document.getElementById("win-popup");
-        c.innerHTML =
-          '<div class="testi-popup bg-dark-card border border-gold/40 rounded-xl shadow-2xl p-4 flex items-start gap-3" style="box-shadow:0 8px 32px rgba(212,175,55,.15)">' +
-          '<div class="text-2xl flex-shrink-0 mt-0.5">' +
-          notif.sport.split(" ")[0] +
-          "</div>" +
-          '<div class="flex-1 min-w-0">' +
-          '<div class="flex items-center justify-between gap-2 mb-1">' +
-          '<span class="font-semibold text-[13px] text-gray-100 truncate">' +
-          notif.name +
-          "</span>" +
-          '<span class="text-10 text-gray-500 flex-shrink-0">' +
-          notif.time +
-          "</span>" +
-          "</div>" +
-          '<div class="text-11 text-gray-400 mb-1.5">' +
-          notif.sport +
-          " · " +
-          notif.book +
-          "</div>" +
-          '<div class="inline-flex items-center gap-1.5 bg-green-900/30 border border-green-700/40 text-green-400 text-11 font-bold px-2.5 py-1 rounded-sm">💰 Won ' +
-          notif.amount +
-          "</div>" +
-          "</div>" +
-          '<button onclick="dismissWinPopup()" class="text-gray-600 hover:text-gray-300 text-base leading-none bg-transparent border-none cursor-pointer flex-shrink-0 mt-0.5">✕</button>' +
-          "</div>";
-        c.classList.remove("hidden");
-        setTimeout(dismissWinPopup, 5000);
-      }
-      function dismissWinPopup() {
-        var c = document.getElementById("win-popup");
-        var inner = c.querySelector(".testi-popup");
-        if (!inner) {
-          winActive = false;
-          return;
-        }
-        inner.classList.add("hiding");
-        setTimeout(function () {
-          c.classList.add("hidden");
-          c.innerHTML = "";
-          winActive = false;
-        }, 380);
-      }
-      function startWinPopups() {
-        setTimeout(function loop() {
-          showNextWin();
-          setTimeout(loop, 8000);
-        }, 3000);
-      }
-
-      // ── Theme ──
-      function applyTheme(t) {
-        var html = document.documentElement;
-        html.classList.toggle("dark", t === "dark");
-        html.classList.toggle("light", t === "light");
-        localStorage.setItem("bm_theme", t);
-        document
-          .getElementById("icon-moon")
-          .classList.toggle("bg-gold", t === "dark");
-        document
-          .getElementById("icon-sun")
-          .classList.toggle("bg-gold", t === "light");
-      }
-      function toggleTheme() {
-        applyTheme(
-          document.documentElement.classList.contains("dark")
-            ? "light"
-            : "dark",
-        );
-      }
-
-      // ── Mobile menu ──
-      function toggleMobileMenu() {
-        var m = document.getElementById("mobile-menu");
-        m.classList.toggle("open");
-      }
-      function closeMobileMenu() {
-        document.getElementById("mobile-menu").classList.remove("open");
-      }
-
-      // ── Nav state: the single source of truth ──
-      function setNavLoggedIn(name) {
-        // Desktop
-        document.body.classList.add("user-authed");
-        document.getElementById("nav-username").textContent = "🃏 " + cap(name);
-        // Mobile username label
-        document.getElementById("mobile-username").textContent =
-          "🃏 " + cap(name);
-      }
-      function setNavLoggedOut() {
-        document.body.classList.remove("user-authed");
-        document.getElementById("nav-username").textContent = "";
-        document.getElementById("mobile-username").textContent = "";
-      }
-
-      // ── Page routing ──
-      var PAGES = ["landing", "signin", "signup", "choose-plan", "dashboard"];
-      function showPage(page) {
-        PAGES.forEach(function (p) {
-          var el = document.getElementById("page-" + p);
-          if (el) el.classList.toggle("hidden", p !== page);
-        });
-        window.scrollTo(0, 0);
-        closeMobileMenu();
-        localStorage.setItem("bm_page", page);
-      }
-      function scrollToSection(id) {
-        var landingHidden = document
-          .getElementById("page-landing")
-          .classList.contains("hidden");
-        if (landingHidden) {
-          showPage("landing");
-          setTimeout(function () {
-            var el = document.getElementById(id);
-            if (el) el.scrollIntoView({ behavior: "smooth" });
-          }, 80);
-        } else {
-          var el = document.getElementById(id);
-          if (el) el.scrollIntoView({ behavior: "smooth" });
-        }
-        closeMobileMenu();
-      }
-      function handleJoinClick() {
-        if (currentUser) showPage("choose-plan");
-        else showPage("signup");
-      }
-
-      // ── Auth ──
-      function cap(s) {
-        return s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
-      }
-
-      function handleSignIn() {
-        var email = document.getElementById("signin-email").value.trim();
-        var pass = document.getElementById("signin-password").value;
-        var err = document.getElementById("signin-error");
-        err.classList.add("hidden");
-        if (!email || !pass) {
-          err.classList.remove("hidden");
-          return;
-        }
-        var stored = JSON.parse(localStorage.getItem("bm_users") || "{}");
-        if (stored[email] && stored[email].password === pass) {
-          currentUser = stored[email];
-        } else if (stored[email]) {
-          err.classList.remove("hidden");
-          return;
-        } else if (pass.length >= 6) {
-          currentUser = {
-            name: email.split("@")[0],
-            email: email,
-            password: pass,
-            plan: null,
-            balance: "0.00",
-            planActivated: false,
-          };
-          stored[email] = currentUser;
-          localStorage.setItem("bm_users", JSON.stringify(stored));
-        } else {
-          err.classList.remove("hidden");
-          return;
-        }
-        saveCurrentUser();
-        setNavLoggedIn(currentUser.name);
-        document.getElementById("signin-email").value = "";
-        document.getElementById("signin-password").value = "";
-        if (currentUser.plan) {
-          loadDashboard();
-          showPage("dashboard");
-        } else showPage("choose-plan");
-      }
-
-      function handleSignUp() {
-        var name = document.getElementById("signup-name").value.trim();
-        var email = document.getElementById("signup-email").value.trim();
-        var country = document.getElementById("signup-country").value;
-        var sbook = document.getElementById("signup-sbook").value;
-        var pass = document.getElementById("signup-pass").value;
-        var pass2 = document.getElementById("signup-pass2").value;
-        var err = document.getElementById("signup-error");
-        err.classList.add("hidden");
-        if (
-          !name ||
-          !email ||
-          !country ||
-          !sbook ||
-          pass.length < 6 ||
-          pass !== pass2
-        ) {
-          err.classList.remove("hidden");
-          return;
-        }
-        var stored = JSON.parse(localStorage.getItem("bm_users") || "{}");
-        currentUser = {
-          name: name,
-          email: email,
-          password: pass,
-          country: country,
-          sportsbook: sbook,
-          plan: null,
-          balance: "0.00",
-          planActivated: false,
-        };
-        stored[email] = currentUser;
-        localStorage.setItem("bm_users", JSON.stringify(stored));
-        localStorage.setItem("bm_current", email);
-        setNavLoggedIn(name);
-        ["signup-name", "signup-email", "signup-pass", "signup-pass2"].forEach(
-          function (id) {
-            document.getElementById(id).value = "";
-          },
-        );
-        document.getElementById("signup-country").value = "";
-        document.getElementById("signup-sbook").value = "";
-        showToast("Welcome to the family, " + cap(name) + "! 🃏");
-        showPage("choose-plan");
-      }
-
-      function saveCurrentUser() {
-        if (!currentUser) return;
-        var stored = JSON.parse(localStorage.getItem("bm_users") || "{}");
-        stored[currentUser.email] = currentUser;
-        localStorage.setItem("bm_users", JSON.stringify(stored));
-        localStorage.setItem("bm_current", currentUser.email);
-      }
-
-      function logout() {
-        currentUser = null;
-        localStorage.removeItem("bm_current");
-        setNavLoggedOut();
-        showToast("Logged out. See you soon 👋");
-        showPage("landing");
-      }
-
-      function gotoSignup(planName) {
-        if (currentUser) selectPlan(planName);
-        else showPage("signup");
-      }
-      function selectPlan(planName) {
-        if (!currentUser) {
-          showPage("signup");
-          return;
-        }
-        var plan = PLANS.find(function (p) {
-          return p.name === planName;
-        });
-        currentUser.plan = planName;
-        currentUser.planPrice = plan ? "$" + plan.price.toLocaleString() : "";
-        saveCurrentUser();
-        loadDashboard();
-        showPage("dashboard");
-        setTimeout(openPaymentModal, 300);
-      }
-
-      // ── Dashboard ──
-      function loadDashboard() {
-        if (!currentUser) return;
-        document.getElementById("dash-username").textContent = cap(
-          currentUser.name,
-        );
-        document.getElementById("dash-balance").textContent =
-          "$" + (currentUser.balance || "0.00");
-        var activated = currentUser.planActivated;
-        var hasPlan = !!currentUser.plan;
-        var daysMap = {
-          "5-Day Trial": "5 days",
-          Weekly: "7 days",
-          Monthly: "30 days",
-          Lifetime: "∞ Forever",
-        };
-        document.getElementById("dash-package").textContent = hasPlan
-          ? currentUser.plan + (activated ? "" : " (Pending)")
-          : "No Active Plan";
-        document.getElementById("dash-expires").textContent = activated
-          ? "Active — expires when plan ends"
-          : hasPlan
-            ? "Awaiting payment confirmation"
-            : "—";
-        document.getElementById("dash-pkg-balance").textContent = activated
-          ? daysMap[currentUser.plan] || "—"
-          : hasPlan
-            ? "⏳ Pending"
-            : "—";
-        document.getElementById("dash-picks-count").textContent = activated
-          ? "5 picks"
-          : "🔒 0";
-        document.getElementById("subscribe-banner").style.display = activated
-          ? "none"
-          : "";
-        var subBtn = document.getElementById("dash-subscribe-btn");
-        subBtn.style.display = activated ? "none" : "";
-        if (!activated && hasPlan) subBtn.textContent = "💳 Complete Payment";
-        var container = document.getElementById("dash-picks");
-        container.innerHTML = DASH_PICKS.map(function (p, i) {
-          var bet = activated
-            ? PICKS_UNLOCKED[i].bet
-            : "🔒 Subscribe to view this pick";
-          var odds = activated ? PICKS_UNLOCKED[i].odds : "—";
-          return (
-            '<div class="bg-dark-card border border-dark-border2 rounded-lg px-4 md:px-5 py-4 flex items-start md:items-center justify-between flex-wrap gap-3">' +
-            '<div><div class="text-10 text-gray-500 tracking-[2px] uppercase mb-1">' +
-            p.sport +
-            "</div>" +
-            '<div class="font-semibold text-[14px] text-gray-100">' +
-            p.match +
-            "</div>" +
-            '<div class="text-13 text-gold mt-1">' +
-            bet +
-            "</div></div>" +
-            '<div class="text-right"><div class="font-anton text-xl md:text-2xl text-gray-100">' +
-            odds +
-            "</div>" +
-            '<span class="inline-block text-10 font-bold tracking-wide uppercase px-2.5 py-1 rounded-sm mt-2 ' +
-            p.badgeClass +
-            '">' +
-            p.badge +
-            "</span></div></div>"
-          );
-        }).join("");
-      }
-
-      // ── Payment ──
-      function openPaymentModal() {
-        if (!currentUser) {
-          showPage("signin");
-          return;
-        }
-        var plan =
-          PLANS.find(function (p) {
-            return p.name === (currentUser.plan || "Monthly");
-          }) || PLANS[2];
-        document.getElementById("modal-plan-label").textContent =
-          plan.name + " Plan";
-        document.getElementById("modal-plan-price").textContent =
-          "$" + plan.price.toLocaleString();
-        document.getElementById("modal-plan-duration").textContent =
-          plan.duration;
-        document.getElementById("payment-modal").classList.remove("hidden");
-      }
-      function closePaymentModal() {
-        document.getElementById("payment-modal").classList.add("hidden");
-        selectedPayMethod = "";
-        document.querySelectorAll("[data-pay]").forEach(function (el) {
-          el.classList.remove("border-gold", "bg-gold/8");
-          el.classList.add("border-dark-border2");
-        });
-        document.getElementById("pay-info-box").innerHTML =
-          '<span class="text-gray-500 text-xs">👆 Select a payment method above to see details</span>';
-      }
-      function handleModalBg(e) {
-        if (e.target === document.getElementById("payment-modal"))
-          closePaymentModal();
-      }
-      function selectPayMethod(id) {
-        selectedPayMethod = id;
-        document.querySelectorAll("[data-pay]").forEach(function (el) {
-          el.classList.remove("border-gold", "bg-gold/8");
-          el.classList.add("border-dark-border2");
-        });
-        var btn = document.querySelector('[data-pay="' + id + '"]');
-        if (btn) {
-          btn.classList.remove("border-dark-border2");
-          btn.classList.add("border-gold", "bg-gold/8");
-        }
-        var m = PAY_METHODS.find(function (p) {
-          return p.id === id;
-        });
-        document.getElementById("pay-info-box").innerHTML =
-          '<div class="text-11 text-gray-500 uppercase tracking-widest font-bold mb-2">' +
-          m.name +
-          ' Details</div><div class="text-13 leading-loose">' +
-          m.info +
-          "</div>";
-      }
-      function confirmPayment() {
-        if (!selectedPayMethod) {
-          showToast("⚠️ Please select a payment method first.");
-          return;
-        }
-        closePaymentModal();
-        document.getElementById("success-modal").classList.remove("hidden");
-        if (currentUser) {
-          currentUser.planPending = true;
-          saveCurrentUser();
-        }
-      }
-      function closeSuccessModal() {
-        document.getElementById("success-modal").classList.add("hidden");
-        showPage("dashboard");
-      }
-
-      // ── Build UI ──
-      function buildPlans(containerId, onClickFn) {
-        var el = document.getElementById(containerId);
-        if (!el) return;
-        el.innerHTML = PLANS.map(function (p) {
-          return (
-            '<div class="relative bg-dark-card border rounded-lg p-6 md:p-8 cursor-pointer hover:-translate-y-1 hover:border-gold transition-all duration-200 ' +
-            (p.featured ? "border-gold" : "border-dark-border2") +
-            '" onclick="' +
-            onClickFn +
-            "('" +
-            p.name +
-            "')\">" +
-            (p.featured
-              ? '<div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gold text-black text-10 font-bold tracking-[2px] uppercase px-4 py-1 rounded-sm whitespace-nowrap">Most Popular</div>'
-              : "") +
-            '<div class="text-11 tracking-[3px] uppercase text-gray-500 font-semibold">' +
-            p.name +
-            "</div>" +
-            '<div class="font-anton text-4xl md:text-5xl text-gray-100 my-2.5"><span class="text-xl text-gold">$</span>' +
-            p.price.toLocaleString() +
-            "</div>" +
-            '<div class="text-xs text-gray-500 mb-6">' +
-            p.duration +
-            "</div>" +
-            '<ul class="flex flex-col gap-2 mb-7">' +
-            p.feats
-              .map(function (f) {
-                return (
-                  '<li class="text-13 text-gray-300 flex items-start gap-2.5"><span class="text-gold text-[9px] mt-1.5 flex-shrink-0">✦</span>' +
-                  f +
-                  "</li>"
-                );
-              })
-              .join("") +
-            "</ul>" +
-            '<button class="w-full py-3 rounded text-12 font-bold tracking-widest uppercase border transition-all ' +
-            (p.featured
-              ? "bg-gold border-gold text-black hover:bg-gold-light"
-              : "bg-transparent border-dark-border2 text-gray-100 hover:border-gold hover:text-gold") +
-            '">' +
-            (p.name === "Lifetime" ? "Go Lifetime" : "Get Started") +
-            "</button></div>"
-          );
-        }).join("");
-      }
-      function buildSbooks() {
-        document.getElementById("sbooks-grid").innerHTML = SBOOKS.map(
-          function (s) {
-            return (
-              '<div class="bg-dark-card border border-dark-border2 rounded-lg p-5 hover:-translate-y-1 hover:border-gold transition-all duration-200">' +
-              '<div class="text-2xl mb-2.5">' +
-              s.icon +
-              "</div>" +
-              '<div class="font-bold text-[14px] text-gray-100 mb-3">' +
-              s.name +
-              "</div>" +
-              '<div class="bg-dark-border2 rounded h-1.5 mb-1.5 overflow-hidden"><div class="sbook-bar" data-rate="' +
-              s.rate +
-              '"></div></div>' +
-              '<div class="font-anton text-xl text-gold">' +
-              s.rate +
-              "%</div>" +
-              '<div class="text-11 text-gray-500 mt-0.5">Win Rate</div></div>'
-            );
-          },
-        ).join("");
-      }
-      function animateBars() {
-        document.querySelectorAll(".sbook-bar").forEach(function (b) {
-          b.style.width = b.dataset.rate + "%";
-        });
-      }
-      function buildTestis() {
-        document.getElementById("testi-grid").innerHTML = TESTIS.map(
-          function (t) {
-            return (
-              '<div class="relative bg-dark-card border border-dark-border2 rounded-lg p-6 md:p-7">' +
-              '<div class="absolute top-2 left-4 font-anton text-7xl text-red opacity-20 leading-none">"</div>' +
-              '<div class="text-gold text-13 mb-3.5">' +
-              "★".repeat(t.stars) +
-              "</div>" +
-              '<p class="text-13 text-gray-400 leading-relaxed mb-5 relative z-10">' +
-              t.text +
-              "</p>" +
-              '<div class="flex items-center gap-3">' +
-              '<div class="w-10 h-10 rounded-full bg-red flex items-center justify-center font-anton text-base text-white flex-shrink-0">' +
-              t.initials +
-              "</div>" +
-              '<div><div class="font-semibold text-13 text-gray-100">' +
-              t.name +
-              "</div>" +
-              '<div class="text-11 text-gold mt-0.5">' +
-              t.tag +
-              "</div>" +
-              '<span class="inline-block bg-green-900/30 border border-green-700/40 text-green-400 text-10 px-2 py-0.5 rounded-sm mt-1.5 font-semibold">' +
-              t.win +
-              "</span></div></div></div>"
-            );
-          },
-        ).join("");
-      }
-      function buildPayMethods() {
-        document.getElementById("pay-methods").innerHTML = PAY_METHODS.map(
-          function (m) {
-            return (
-              '<button data-pay="' +
-              m.id +
-              '" onclick="selectPayMethod(\'' +
-              m.id +
-              '\')" class="bg-dark-card2 border border-dark-border2 rounded-lg py-3 px-2 text-center cursor-pointer hover:border-gold transition-all">' +
-              '<div class="text-xl mb-1">' +
-              m.icon +
-              "</div>" +
-              '<div class="text-10 font-semibold text-gray-100">' +
-              m.name +
-              "</div></button>"
-            );
-          },
-        ).join("");
-      }
-      function buildSportsTabs() {
-        document.getElementById("sports-tabs").innerHTML = SPORTS.map(
-          function (s) {
-            return (
-              '<button id="stab-' +
-              s.id +
-              '" onclick="selectSport(\'' +
-              s.id +
-              '\')" class="flex items-center gap-2 px-4 py-2 rounded-full border border-dark-border2 bg-dark-card text-gray-100 text-13 font-semibold cursor-pointer hover:border-gold hover:text-gold transition-all whitespace-nowrap">' +
-              s.icon +
-              " " +
-              s.label +
-              "</button>"
-            );
-          },
-        ).join("");
-      }
-      function selectSport(id) {
-        var sport = SPORTS.find(function (s) {
-          return s.id === id;
-        });
-        if (!sport) return;
-        if (activeSportId === id) {
-          activeSportId = null;
-          document.querySelectorAll('[id^="stab-"]').forEach(function (t) {
-            t.classList.remove("bg-gold", "border-gold", "text-black");
-            t.classList.add("border-dark-border2", "text-gray-100");
-          });
-          var d = document.getElementById("sport-detail");
-          d.classList.add("hidden");
-          d.innerHTML = "";
-          return;
-        }
-        activeSportId = id;
-        document.querySelectorAll('[id^="stab-"]').forEach(function (t) {
-          t.classList.remove("bg-gold", "border-gold", "text-black");
-          t.classList.add("border-dark-border2", "text-gray-100");
-        });
-        var activeTab = document.getElementById("stab-" + id);
-        if (activeTab) {
-          activeTab.classList.remove("border-dark-border2", "text-gray-100");
-          activeTab.classList.add("bg-gold", "border-gold", "text-black");
-        }
-        var statsHtml = sport.stats
-          .map(function (st) {
-            return (
-              '<div class="text-center bg-dark-card2 border border-dark-border2 rounded-lg py-3.5 px-4 min-w-[80px]"><div class="font-anton text-xl md:text-2xl text-gold">' +
-              st.v +
-              '</div><div class="text-10 text-gray-500 uppercase tracking-widest mt-1">' +
-              st.l +
-              "</div></div>"
-            );
-          })
-          .join("");
-        var detailEl = document.getElementById("sport-detail");
-        detailEl.classList.add("hidden");
-        detailEl.innerHTML =
-          '<div class="sport-fade bg-dark-card border border-dark-border2 rounded-xl p-6 md:p-10 flex flex-col sm:flex-row gap-6 md:gap-7 items-start">' +
-          '<div class="text-5xl md:text-6xl leading-none flex-shrink-0">' +
-          sport.icon +
-          "</div>" +
-          '<div class="flex-1"><div class="text-11 text-red font-semibold tracking-[3px] uppercase mb-2">' +
-          sport.tag +
-          "</div>" +
-          '<div class="sport-name-size font-anton tracking-[2px] text-gold mb-4">' +
-          sport.name +
-          "</div>" +
-          '<p class="text-[13px] md:text-[14px] text-gray-400 leading-relaxed mb-6 max-w-2xl">' +
-          sport.desc +
-          "</p>" +
-          '<div class="flex flex-wrap gap-3 mb-6">' +
-          statsHtml +
-          "</div>" +
-          '<button onclick="handleJoinClick()" class="bg-gold text-black px-6 md:px-7 py-3 rounded font-bold text-13 tracking-[2px] uppercase hover:bg-gold-light hover:-translate-y-0.5 transition-all">Get ' +
-          sport.label +
-          " Picks →</button>" +
-          "</div></div>";
-        detailEl.classList.remove("hidden");
-        setTimeout(function () {
-          detailEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
-        }, 60);
-      }
-
-      function animateCounter(el, end, prefix, suffix, dur) {
-        var start = 0,
-          step = Math.ceil(end / (dur / 16));
-        var t = setInterval(function () {
-          start = Math.min(start + step, end);
-          el.textContent = prefix + start.toLocaleString() + suffix;
-          if (start >= end) clearInterval(t);
-        }, 16);
-      }
-      function setupObserver() {
-        var sec = document.getElementById("sbooks-section");
-        if (!sec) return;
-        new IntersectionObserver(
-          function (entries, obs) {
-            entries.forEach(function (e) {
-              if (e.isIntersecting) {
-                animateBars();
-                obs.disconnect();
-              }
-            });
-          },
-          { threshold: 0.2 },
-        ).observe(sec);
-      }
-
-      // ── INIT ──
-      (function init() {
-        applyTheme(localStorage.getItem("bm_theme") || "dark");
-        buildPlans("plans-grid", "gotoSignup");
-        buildPlans("choose-plans-grid", "selectPlan");
-        buildSbooks();
-        buildTestis();
-        buildPayMethods();
-        buildSportsTabs();
-        setupObserver();
-        startWinPopups();
-
-        setTimeout(function () {
-          animateCounter(
-            document.getElementById("stat-winrate"),
-            89,
-            "",
-            "%",
-            1200,
-          );
-          animateCounter(
-            document.getElementById("stat-members"),
-            12000,
-            "",
-            "+",
-            1400,
-          );
-          animateCounter(
-            document.getElementById("stat-paid"),
-            4200000,
-            "$",
-            "",
-            1600,
-          );
-        }, 400);
-
-        // Restore session
-        var savedEmail = localStorage.getItem("bm_current");
-        if (savedEmail) {
-          var stored = JSON.parse(localStorage.getItem("bm_users") || "{}");
-          if (stored[savedEmail]) {
-            currentUser = stored[savedEmail];
-            setNavLoggedIn(currentUser.name);
-            if (currentUser.plan) loadDashboard();
-          }
-        }
-
-        // Determine start page
-        var lastPage = localStorage.getItem("bm_page") || "landing";
-        if (
-          !currentUser &&
-          (lastPage === "dashboard" || lastPage === "choose-plan")
-        )
-          lastPage = "landing";
-        showPage(lastPage);
-      })();
-    </script>
+    <script src="/main.js"></script>
   </body>
 </html>
