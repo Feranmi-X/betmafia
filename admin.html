@@ -1,0 +1,967 @@
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BET MAFIA — Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode:"class",
+      theme:{extend:{
+        fontFamily:{anton:["Anton","sans-serif"],inter:["Inter","sans-serif"]},
+        colors:{
+          gold:{DEFAULT:"#d4af37",light:"#f0d060"},
+          red:{DEFAULT:"#cc0000",dark:"#a30000"},
+          dark:{bg:"#0a0a0a",bg2:"#111111",card:"#161616",card2:"#1e1e1e",border:"#252525",border2:"#2e2e2e"}
+        },
+        fontSize:{10:"10px",11:"11px",13:"13px"}
+      }}
+    };
+  </script>
+  <style>
+    *{box-sizing:border-box;}
+    body{font-family:"Inter",sans-serif;background:#0a0a0a;color:#f3f4f6;}
+    .font-anton{font-family:"Anton",sans-serif;}
+    ::-webkit-scrollbar{width:4px;height:4px;}
+    ::-webkit-scrollbar-track{background:transparent;}
+    ::-webkit-scrollbar-thumb{background:#2e2e2e;border-radius:4px;}
+
+    /* Sidebar */
+    #sidebar{width:220px;flex-shrink:0;transition:transform .25s;}
+    @media(max-width:768px){
+      #sidebar{position:fixed;top:0;left:0;height:100vh;z-index:50;transform:translateX(-100%);}
+      #sidebar.open{transform:translateX(0);}
+      #sidebar-overlay{display:none;position:fixed;inset:0;z-index:49;background:rgba(0,0,0,.6);}
+      #sidebar-overlay.open{display:block;}
+    }
+
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:#9ca3af;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+    .nav-item:hover{background:#1e1e1e;color:#f3f4f6;}
+    .nav-item.active{background:#1a1500;color:#d4af37;border:1px solid #d4af3730;}
+
+    /* Cards */
+    .stat-card{background:#161616;border:1px solid #2e2e2e;border-radius:12px;padding:20px 22px;}
+    .stat-card:hover{border-color:#d4af3740;}
+
+    /* Table */
+    .data-table{width:100%;border-collapse:collapse;}
+    .data-table th{text-align:left;padding:10px 14px;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#6b7280;border-bottom:1px solid #2e2e2e;}
+    .data-table td{padding:12px 14px;font-size:13px;border-bottom:1px solid #1e1e1e;vertical-align:middle;}
+    .data-table tr:last-child td{border-bottom:none;}
+    .data-table tr:hover td{background:#111;}
+
+    /* Badges */
+    .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+    .badge-green{background:#14532d40;color:#4ade80;border:1px solid #4ade8030;}
+    .badge-gold{background:#d4af3715;color:#d4af37;border:1px solid #d4af3730;}
+    .badge-red{background:#7f1d1d40;color:#f87171;border:1px solid #f8717130;}
+    .badge-gray{background:#1e1e1e;color:#9ca3af;border:1px solid #2e2e2e;}
+    .badge-blue{background:#1e3a5f40;color:#60a5fa;border:1px solid #60a5fa30;}
+
+    /* Inputs */
+    .field{background:#1e1e1e;border:1px solid #2e2e2e;color:#f3f4f6;border-radius:8px;padding:9px 13px;font-size:13px;outline:none;width:100%;transition:border-color .15s;}
+    .field:focus{border-color:#d4af37;}
+    .field::placeholder{color:#4b5563;}
+    select.field option{background:#1e1e1e;}
+
+    /* Buttons */
+    .btn-gold{background:#d4af37;color:#000;border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .15s;}
+    .btn-gold:hover{background:#f0d060;}
+    .btn-outline{background:transparent;border:1px solid #2e2e2e;color:#9ca3af;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
+    .btn-outline:hover{border-color:#d4af37;color:#d4af37;}
+    .btn-red{background:#cc0000;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;}
+    .btn-red:hover{background:#a30000;}
+    .btn-green{background:#16a34a;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;}
+    .btn-green:hover{background:#15803d;}
+    .btn-sm{padding:5px 11px!important;font-size:11px!important;}
+
+    /* Modal */
+    .modal-bg{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:16px;}
+    .modal-box{background:#161616;border:1px solid #2e2e2e;border-radius:14px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;}
+
+    /* Toast */
+    #toast{position:fixed;bottom:24px;right:24px;z-index:999;background:#161616;border:1px solid #d4af37;color:#f3f4f6;padding:12px 18px;border-radius:10px;font-size:13px;max-width:320px;transition:all .3s;opacity:0;transform:translateY(16px);pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,.5);}
+
+    /* Section panels */
+    .panel{display:none;}
+    .panel.active{display:block;}
+
+    /* Scrollable table wrapper */
+    .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+
+    /* Pulse dot */
+    .pulse-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;animation:pulse 2s infinite;}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen" class="min-h-screen flex items-center justify-center px-4">
+  <div style="background:#161616;border:1px solid #2e2e2e;border-radius:16px;padding:40px;width:100%;max-width:380px;">
+    <div class="font-anton text-2xl tracking-[3px] text-gold text-center mb-1">🃏 BET MAFIA</div>
+    <div style="font-size:10px;color:#6b7280;letter-spacing:.2em;text-transform:uppercase;text-align:center;margin-bottom:32px;">Admin Portal</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:28px;">
+      <div class="pulse-dot"></div>
+      <span style="font-size:11px;color:#4ade80;font-weight:600;letter-spacing:.08em;">SECURE ACCESS</span>
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="display:block;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#6b7280;margin-bottom:6px;">Admin Username</label>
+      <input id="admin-user" type="text" placeholder="admin" class="field" onkeydown="if(event.key==='Enter')tryLogin()"/>
+    </div>
+    <div style="margin-bottom:20px;">
+      <label style="display:block;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#6b7280;margin-bottom:6px;">Password</label>
+      <input id="admin-pass" type="password" placeholder="••••••••" class="field" onkeydown="if(event.key==='Enter')tryLogin()"/>
+      <p id="login-err" style="display:none;color:#f87171;font-size:11px;margin-top:6px;font-weight:600;">❌ Invalid credentials.</p>
+    </div>
+    <button onclick="tryLogin()" class="btn-gold" style="width:100%;padding:12px;">Access Dashboard</button>
+    <p style="font-size:10px;color:#374151;text-align:center;margin-top:16px;">Authorized personnel only</p>
+  </div>
+</div>
+
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none;min-height:100vh;display:none;flex-direction:column;">
+
+  <!-- Top bar -->
+  <header style="height:56px;border-bottom:1px solid #2e2e2e;background:#0d0d0d;display:flex;align-items:center;padding:0 16px;gap:12px;position:sticky;top:0;z-index:40;">
+    <button onclick="toggleSidebar()" style="background:none;border:none;cursor:pointer;padding:6px;display:flex;flex-direction:column;gap:5px;" class="md:hidden">
+      <span style="display:block;width:20px;height:2px;background:#9ca3af;border-radius:2px;"></span>
+      <span style="display:block;width:20px;height:2px;background:#9ca3af;border-radius:2px;"></span>
+      <span style="display:block;width:20px;height:2px;background:#9ca3af;border-radius:2px;"></span>
+    </button>
+    <div class="font-anton text-lg tracking-[3px] text-gold">🃏 BET MAFIA</div>
+    <div style="font-size:10px;color:#374151;letter-spacing:.15em;text-transform:uppercase;margin-left:2px;">Admin</div>
+    <div style="flex:1;"></div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="pulse-dot"></div>
+      <span style="font-size:11px;color:#4ade80;font-weight:600;display:none;" class="sm:inline">LIVE</span>
+    </div>
+    <div style="width:1px;height:24px;background:#2e2e2e;margin:0 4px;"></div>
+    <button onclick="adminLogout()" style="background:none;border:1px solid #2e2e2e;color:#9ca3af;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='#cc0000';this.style.color='#f87171'" onmouseout="this.style.borderColor='#2e2e2e';this.style.color='#9ca3af'">Log Out</button>
+  </header>
+
+  <!-- Body -->
+  <div style="display:flex;flex:1;overflow:hidden;">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" style="background:#0d0d0d;border-right:1px solid #2e2e2e;padding:16px 12px;display:flex;flex-direction:column;gap:4px;overflow-y:auto;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#374151;padding:8px 14px 4px;">Navigation</div>
+      <button class="nav-item active" onclick="showPanel('overview')"     id="nav-overview">     📊 Overview</button>
+      <button class="nav-item"        onclick="showPanel('members')"      id="nav-members">      👥 Members</button>
+      <button class="nav-item"        onclick="showPanel('withdrawals')"  id="nav-withdrawals">  💸 Withdrawals</button>
+      <button class="nav-item"        onclick="showPanel('picks')"        id="nav-picks">        🎯 Daily Picks</button>
+      <button class="nav-item"        onclick="showPanel('payments')"     id="nav-payments">     💳 Payment Info</button>
+      <button class="nav-item"        onclick="showPanel('email')"        id="nav-email">        ✉️ Send Email</button>
+      <div style="flex:1;"></div>
+      <div style="border-top:1px solid #1e1e1e;padding-top:12px;margin-top:8px;">
+        <div style="font-size:10px;color:#374151;padding:0 14px 6px;letter-spacing:.1em;text-transform:uppercase;">Logged in as</div>
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;">
+          <div style="width:30px;height:30px;background:#d4af37;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#000;flex-shrink:0;">A</div>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:#f3f4f6;">Admin</div>
+            <div style="font-size:10px;color:#6b7280;">Super Admin</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main style="flex:1;overflow-y:auto;padding:20px 16px 40px;" id="main-content">
+
+      <!-- ── OVERVIEW ── -->
+      <div id="panel-overview" class="panel active">
+        <div style="margin-bottom:24px;">
+          <p style="font-size:10px;color:#cc0000;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:4px;">Control Center</p>
+          <h1 class="font-anton" style="font-size:clamp(22px,4vw,36px);letter-spacing:3px;">Dashboard <span style="color:#d4af37;">Overview</span></h1>
+        </div>
+        <!-- Stat cards -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px;" id="stat-cards">
+          <div class="stat-card">
+            <div style="font-size:10px;color:#6b7280;letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px;">Total Members</div>
+            <div class="font-anton" style="font-size:32px;color:#d4af37;" id="ov-total">0</div>
+            <div style="font-size:11px;color:#4b5563;margin-top:2px;">Registered accounts</div>
+          </div>
+          <div class="stat-card">
+            <div style="font-size:10px;color:#6b7280;letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px;">Active Plans</div>
+            <div class="font-anton" style="font-size:32px;color:#4ade80;" id="ov-active">0</div>
+            <div style="font-size:11px;color:#4b5563;margin-top:2px;">Paying members</div>
+          </div>
+          <div class="stat-card">
+            <div style="font-size:10px;color:#6b7280;letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px;">Pending Payments</div>
+            <div class="font-anton" style="font-size:32px;color:#f59e0b;" id="ov-pending">0</div>
+            <div style="font-size:11px;color:#4b5563;margin-top:2px;">Awaiting confirmation</div>
+          </div>
+          <div class="stat-card">
+            <div style="font-size:10px;color:#6b7280;letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px;">Pending Withdrawals</div>
+            <div class="font-anton" style="font-size:32px;color:#f87171;" id="ov-withdrawals">0</div>
+            <div style="font-size:11px;color:#4b5563;margin-top:2px;">Awaiting approval</div>
+          </div>
+        </div>
+
+        <!-- Recent members -->
+        <div style="background:#161616;border:1px solid #2e2e2e;border-radius:12px;overflow:hidden;">
+          <div style="padding:16px 20px;border-bottom:1px solid #2e2e2e;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+            <div class="font-anton" style="font-size:16px;letter-spacing:2px;">Recent Members</div>
+            <button class="btn-outline btn-sm" onclick="showPanel('members')">View All →</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table" id="recent-table">
+              <thead><tr>
+                <th>Name</th><th>Email</th><th>Plan</th><th>Status</th><th>Joined</th>
+              </tr></thead>
+              <tbody id="recent-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MEMBERS ── -->
+      <div id="panel-members" class="panel">
+        <div style="margin-bottom:24px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div>
+            <p style="font-size:10px;color:#cc0000;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:4px;">User Management</p>
+            <h1 class="font-anton" style="font-size:clamp(22px,4vw,36px);letter-spacing:3px;">All <span style="color:#d4af37;">Members</span></h1>
+          </div>
+          <input id="member-search" type="text" placeholder="Search by name or email…" class="field" style="max-width:260px;" oninput="renderMembers()"/>
+        </div>
+        <div style="background:#161616;border:1px solid #2e2e2e;border-radius:12px;overflow:hidden;">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr>
+                <th>Member</th><th>Email</th><th>Country</th><th>Plan</th><th>Balance</th><th>Status</th><th>Actions</th>
+              </tr></thead>
+              <tbody id="members-tbody"></tbody>
+            </table>
+          </div>
+          <div id="members-empty" style="display:none;padding:40px;text-align:center;color:#6b7280;font-size:13px;">No members found.</div>
+        </div>
+      </div>
+
+      <!-- ── WITHDRAWALS ── -->
+      <div id="panel-withdrawals" class="panel">
+        <div style="margin-bottom:24px;">
+          <p style="font-size:10px;color:#cc0000;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:4px;">Finance</p>
+          <h1 class="font-anton" style="font-size:clamp(22px,4vw,36px);letter-spacing:3px;">Withdrawal <span style="color:#d4af37;">Requests</span></h1>
+        </div>
+        <div style="background:#161616;border:1px solid #2e2e2e;border-radius:12px;overflow:hidden;">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr>
+                <th>Member</th><th>Amount</th><th>Method</th><th>Details</th><th>Requested</th><th>Status</th><th>Actions</th>
+              </tr></thead>
+              <tbody id="withdrawals-tbody"></tbody>
+            </table>
+          </div>
+          <div id="wd-empty" style="padding:40px;text-align:center;color:#6b7280;font-size:13px;">No withdrawal requests yet.</div>
+        </div>
+      </div>
+
+      <!-- ── DAILY PICKS ── -->
+      <div id="panel-picks" class="panel">
+        <div style="margin-bottom:24px;">
+          <p style="font-size:10px;color:#cc0000;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:4px;">Content</p>
+          <h1 class="font-anton" style="font-size:clamp(22px,4vw,36px);letter-spacing:3px;">Daily <span style="color:#d4af37;">Picks</span></h1>
+        </div>
+        <!-- Add pick form -->
+        <div style="background:#161616;border:1px solid #2e2e2e;border-radius:12px;padding:20px;margin-bottom:20px;">
+          <div class="font-anton" style="font-size:15px;letter-spacing:2px;margin-bottom:16px;color:#d4af37;">➕ Post New Pick</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:12px;">
+            <div>
+              <label style="display:block;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#6b7280;margin-bottom:5px;">Sport / Event</label>
+              <input id="pick-sport" type="text" placeholder="NBA · Tonight 7:30 PM" class="field"/>
+            </div>
+            <div>
+              <label style="display:block;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#6b7280;margin-bottom:5px;">Matchup</label>
+              <input id="pick-match" type="text" placeholder="Lakers vs Celtics" class="field"/>
+            </div>
+            <div>
+              <label style="display:block;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#6b7280;margin-bottom:5px;">Pick / Bet</label>
+              <input id="pick-bet" type="text" placeholder="Lakers -4.5 | Under 228.5" class="field"/>
+            </div>
+            <div>
+              <label style="display:block;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#6b7280;margin-bottom:5px;">Odds</label>
+              <input id="pick-odds" type="text" placeholder="-110" class="field"/>
+            </div>
+            <div>
+              <label style="display:block;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#6b7280;margin-bottom:5px;">Badge</label>
+              <select id="pick-badge" class="field">
+                <option value="🔥 Hot">🔥 Hot</option>
+                <option value="🔐 Lock">🔐 Lock</option>
+                <option value="💎 Premium">💎 Premium</option>
+                <option value="⚡ Sharp">⚡ Sharp</option>
+              </select>
+            </div>
+          </div>
+          <button onclick="addPick()" class="btn-gold">Post Pick</button>
+        </div>
+        <!-- Picks list -->
+        <div style="background:#161616;border:1px solid #2e2e2e;border-radius:12px;overflow:hidden;">
+          <div style="padding:16px 20px;border-bottom:1px solid #2e2e2e;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+            <div class="font-anton" style="font-size:15px;letter-spacing:2px;">Active Picks</div>
+            <button onclick="clearAllPicks()" class="btn-outline btn-sm" style="color:#f87171;border-color:#7f1d1d40;" onmouseover="this.style.borderColor='#cc0000'" onmouseout="this.style.borderColor='#7f1d1d40'">Clear All</button>
+          </div>
+          <div id="picks-list" style="padding:8px 0;"></div>
+          <div id="picks-empty" style="padding:32px;text-align:center;color:#6b7280;font-size:13px;">No picks posted yet. Add one above.</div>
+        </div>
+      </div>
+
+      <!-- ── PAYMENT INFO ── -->
+      <div id="panel-payments" class="panel">
+        <div style="margin-bottom:24px;">
+          <p style="font-size:10px;color:#cc0000;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:4px;">Settings</p>
+          <h1 class="font-anton" style="font-size:clamp(22px,4vw,36px);letter-spacing:3px;">Payment <span style="color:#d4af37;">Methods</span></h1>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;" id="payment-cards"></div>
+        <div style="margin-top:16px;background:#161616;border:1px solid #2e2e2e;border-radius:12px;padding:20px;">
+          <div class="font-anton" style="font-size:15px;letter-spacing:2px;margin-bottom:14px;color:#d4af37;">➕ Add Payment Method</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:12px;">
+            <div>
+              <label style="display:block;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#6b7280;margin-bottom:5px;">Method Name</label>
+              <input id="pm-name" type="text" placeholder="Zelle, CashApp…" class="field"/>
+            </div>
+            <div>
+              <label style="display:block;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#6b7280;margin-bottom:5px;">Icon / Emoji</label>
+              <input id="pm-icon" type="text" placeholder="💚" class="field"/>
+            </div>
+            <div style="grid-column:1/-1;">
+              <label style="display:block;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#6b7280;margin-bottom:5px;">Payment Details (shown to users)</label>
+              <input id="pm-info" type="text" placeholder="Send to: betmafia@zelle.com · Name: Bet Mafia VIP" class="field"/>
+            </div>
+          </div>
+          <button onclick="addPaymentMethod()" class="btn-gold">Save Method</button>
+        </div>
+      </div>
+
+      <!-- ── EMAIL ── -->
+      <div id="panel-email" class="panel">
+        <div style="margin-bottom:24px;">
+          <p style="font-size:10px;color:#cc0000;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:4px;">Communications</p>
+          <h1 class="font-anton" style="font-size:clamp(22px,4vw,36px);letter-spacing:3px;">Send <span style="color:#d4af37;">Email</span></h1>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start;" class="email-grid">
+          <!-- Compose -->
+          <div style="background:#161616;border:1px solid #2e2e2e;border-radius:12px;padding:22px;">
+            <div class="font-anton" style="font-size:15px;letter-spacing:2px;margin-bottom:18px;color:#d4af37;">✉️ Compose Message</div>
+            <div style="margin-bottom:14px;">
+              <label style="display:block;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#6b7280;margin-bottom:5px;">Recipients</label>
+              <select id="email-to" class="field" onchange="updateRecipientPreview()">
+                <option value="all">📢 All Members</option>
+                <option value="active">✅ Active Plan Members Only</option>
+                <option value="pending">⏳ Pending Payment Members</option>
+                <option value="specific">✏️ Specific Email Address</option>
+              </select>
+            </div>
+            <div id="specific-email-wrap" style="display:none;margin-bottom:14px;">
+              <label style="display:block;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#6b7280;margin-bottom:5px;">Email Address</label>
+              <input id="email-specific" type="email" placeholder="member@example.com" class="field"/>
+            </div>
+            <div style="margin-bottom:14px;">
+              <label style="display:block;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#6b7280;margin-bottom:5px;">Subject</label>
+              <input id="email-subject" type="text" placeholder="🔥 VIP Picks Dropping Tonight…" class="field"/>
+            </div>
+            <div style="margin-bottom:18px;">
+              <label style="display:block;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#6b7280;margin-bottom:5px;">Message</label>
+              <textarea id="email-body" rows="8" placeholder="Write your message to members here…" class="field" style="resize:vertical;line-height:1.6;"></textarea>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button onclick="sendEmail()" class="btn-gold">Send Email</button>
+              <button onclick="previewEmail()" class="btn-outline">Preview</button>
+            </div>
+          </div>
+          <!-- Recipient preview -->
+          <div style="background:#161616;border:1px solid #2e2e2e;border-radius:12px;padding:18px;position:sticky;top:12px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#6b7280;margin-bottom:14px;">Recipients Preview</div>
+            <div id="recipient-preview" style="display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto;"></div>
+            <div id="recipient-count" style="font-size:11px;color:#6b7280;margin-top:12px;padding-top:12px;border-top:1px solid #1e1e1e;"></div>
+          </div>
+        </div>
+        <!-- Email log -->
+        <div style="background:#161616;border:1px solid #2e2e2e;border-radius:12px;overflow:hidden;margin-top:16px;">
+          <div style="padding:14px 20px;border-bottom:1px solid #2e2e2e;">
+            <div class="font-anton" style="font-size:15px;letter-spacing:2px;">Sent Log</div>
+          </div>
+          <div id="email-log" style="padding:8px 0;"></div>
+          <div id="email-log-empty" style="padding:32px;text-align:center;color:#6b7280;font-size:13px;">No emails sent yet.</div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ── MODALS ── -->
+<!-- Edit Member Modal -->
+<div id="modal-member" class="modal-bg" style="display:none;" onclick="if(event.target===this)closeModal('modal-member')">
+  <div class="modal-box">
+    <div style="padding:18px 22px;border-bottom:1px solid #2e2e2e;display:flex;justify-content:space-between;align-items:center;">
+      <div class="font-anton" style="font-size:17px;letter-spacing:2px;">Edit Member</div>
+      <button onclick="closeModal('modal-member')" style="background:none;border:none;color:#6b7280;cursor:pointer;font-size:18px;line-height:1;">✕</button>
+    </div>
+    <div style="padding:22px;display:flex;flex-direction:column;gap:14px;">
+      <input type="hidden" id="edit-email"/>
+      <div>
+        <label style="display:block;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#6b7280;margin-bottom:5px;">Name</label>
+        <input id="edit-name" type="text" class="field"/>
+      </div>
+      <div>
+        <label style="display:block;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#6b7280;margin-bottom:5px;">Balance ($)</label>
+        <input id="edit-balance" type="number" step="0.01" class="field"/>
+      </div>
+      <div>
+        <label style="display:block;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#6b7280;margin-bottom:5px;">Active Plan</label>
+        <select id="edit-plan" class="field">
+          <option value="">No Plan</option>
+          <option value="5-Day Trial">5-Day Trial</option>
+          <option value="Weekly">Weekly</option>
+          <option value="Monthly">Monthly</option>
+          <option value="Lifetime">Lifetime</option>
+        </select>
+      </div>
+      <div>
+        <label style="display:block;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#6b7280;margin-bottom:5px;">Plan Status</label>
+        <select id="edit-activated" class="field">
+          <option value="false">Pending / Inactive</option>
+          <option value="true">Active</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:4px;">
+        <button onclick="saveMember()" class="btn-gold" style="flex:1;">Save Changes</button>
+        <button onclick="closeModal('modal-member')" class="btn-outline">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Email Preview Modal -->
+<div id="modal-preview" class="modal-bg" style="display:none;" onclick="if(event.target===this)closeModal('modal-preview')">
+  <div class="modal-box" style="max-width:560px;">
+    <div style="padding:18px 22px;border-bottom:1px solid #2e2e2e;display:flex;justify-content:space-between;align-items:center;">
+      <div class="font-anton" style="font-size:17px;letter-spacing:2px;">Email Preview</div>
+      <button onclick="closeModal('modal-preview')" style="background:none;border:none;color:#6b7280;cursor:pointer;font-size:18px;line-height:1;">✕</button>
+    </div>
+    <div style="padding:22px;">
+      <div style="background:#0a0a0a;border:1px solid #2e2e2e;border-radius:10px;overflow:hidden;">
+        <div style="background:#1a1000;padding:16px 20px;border-bottom:1px solid #2e2e2e;">
+          <div style="font-family:Anton,sans-serif;font-size:18px;letter-spacing:3px;color:#d4af37;margin-bottom:8px;">🃏 BET MAFIA</div>
+          <div style="font-size:11px;color:#6b7280;margin-bottom:4px;">To: <span id="preview-to" style="color:#9ca3af;"></span></div>
+          <div style="font-size:13px;font-weight:600;color:#f3f4f6;" id="preview-subject"></div>
+        </div>
+        <div style="padding:20px;font-size:14px;line-height:1.7;color:#d1d5db;white-space:pre-wrap;" id="preview-body"></div>
+        <div style="padding:14px 20px;border-top:1px solid #1e1e1e;font-size:11px;color:#374151;">Bet Mafia VIP · admin@betmafia.vip · discord.gg/betmafia</div>
+      </div>
+      <button onclick="closeModal('modal-preview')" class="btn-outline" style="margin-top:14px;width:100%;">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Payment Method Modal -->
+<div id="modal-payment" class="modal-bg" style="display:none;" onclick="if(event.target===this)closeModal('modal-payment')">
+  <div class="modal-box">
+    <div style="padding:18px 22px;border-bottom:1px solid #2e2e2e;display:flex;justify-content:space-between;align-items:center;">
+      <div class="font-anton" style="font-size:17px;letter-spacing:2px;">Edit Payment Method</div>
+      <button onclick="closeModal('modal-payment')" style="background:none;border:none;color:#6b7280;cursor:pointer;font-size:18px;line-height:1;">✕</button>
+    </div>
+    <div style="padding:22px;display:flex;flex-direction:column;gap:14px;">
+      <input type="hidden" id="pm-edit-idx"/>
+      <div>
+        <label style="display:block;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#6b7280;margin-bottom:5px;">Method Name</label>
+        <input id="pm-edit-name" type="text" class="field"/>
+      </div>
+      <div>
+        <label style="display:block;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#6b7280;margin-bottom:5px;">Icon</label>
+        <input id="pm-edit-icon" type="text" class="field"/>
+      </div>
+      <div>
+        <label style="display:block;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#6b7280;margin-bottom:5px;">Payment Details</label>
+        <input id="pm-edit-info" type="text" class="field"/>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:4px;">
+        <button onclick="savePaymentMethod()" class="btn-gold" style="flex:1;">Save</button>
+        <button onclick="closeModal('modal-payment')" class="btn-outline">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<style>
+  .email-grid { grid-template-columns: 1fr 300px; }
+  @media(max-width:768px){ .email-grid{ grid-template-columns:1fr; } }
+</style>
+
+<script>
+// ── Constants ──
+var ADMIN_USER = "admin";
+var ADMIN_PASS = "BetMafia2025!";
+
+var DEFAULT_PAYMENTS = [
+  {id:"zelle",  icon:"💚", name:"Zelle",    info:"Send to: betmafia@zelle.com · Name: Bet Mafia VIP · Note: Your name + plan"},
+  {id:"chime",  icon:"💛", name:"Chime",    info:"Send to: $BetMafiaVIP · Include your email in the memo field"},
+  {id:"apple",  icon:"🍎", name:"Apple Pay",info:"Send to: +1 (702) 555-0198 · Name: Bet Mafia Admin · Note: VIP Plan + your email"},
+  {id:"bitcoin",icon:"₿",  name:"Bitcoin",  info:"BTC: bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"},
+  {id:"cashapp",icon:"💵", name:"Cash App", info:"Cashtag: $BetMafiaVIP · Include your name and plan in the note"},
+  {id:"paypal", icon:"🔵", name:"PayPal",   info:"Send to: payments@betmafia.vip · Friends & Family ONLY"}
+];
+
+// ── Helpers ──
+var toastTimer;
+function showToast(msg, type){
+  var t = document.getElementById("toast");
+  t.textContent = msg;
+  t.style.borderColor = type==="error" ? "#cc0000" : type==="success" ? "#4ade80" : "#d4af37";
+  t.style.opacity = "1";
+  t.style.transform = "translateY(0)";
+  t.style.pointerEvents = "auto";
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){
+    t.style.opacity="0"; t.style.transform="translateY(16px)"; t.style.pointerEvents="none";
+  }, 3000);
+}
+function closeModal(id){ document.getElementById(id).style.display="none"; }
+function openModal(id){  document.getElementById(id).style.display="flex"; }
+function cap(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : ""; }
+function fmtDate(ts){ return ts ? new Date(ts).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}) : "—"; }
+
+// ── Storage helpers ──
+function getUsers(){ return JSON.parse(localStorage.getItem("bm_users")||"{}"); }
+function saveUsers(u){ localStorage.setItem("bm_users", JSON.stringify(u)); }
+function getPicks(){ return JSON.parse(localStorage.getItem("bm_admin_picks")||"[]"); }
+function savePicks(p){ localStorage.setItem("bm_admin_picks", JSON.stringify(p)); }
+function getPayments(){ return JSON.parse(localStorage.getItem("bm_pay_methods")) || DEFAULT_PAYMENTS; }
+function savePayments(p){ localStorage.setItem("bm_pay_methods", JSON.stringify(p)); }
+function getWithdrawals(){ return JSON.parse(localStorage.getItem("bm_withdrawals")||"[]"); }
+function saveWithdrawals(w){ localStorage.setItem("bm_withdrawals", JSON.stringify(w)); }
+function getEmailLog(){ return JSON.parse(localStorage.getItem("bm_email_log")||"[]"); }
+function saveEmailLog(l){ localStorage.setItem("bm_email_log", JSON.stringify(l)); }
+
+// ── Login ──
+function tryLogin(){
+  var u = document.getElementById("admin-user").value.trim();
+  var p = document.getElementById("admin-pass").value;
+  var err = document.getElementById("login-err");
+  if(u===ADMIN_USER && p===ADMIN_PASS){
+    err.style.display="none";
+    document.getElementById("login-screen").style.display="none";
+    var app = document.getElementById("app");
+    app.style.display="flex";
+    app.style.flexDirection="column";
+    initApp();
+  } else {
+    err.style.display="block";
+    document.getElementById("admin-pass").value="";
+  }
+}
+function adminLogout(){
+  document.getElementById("app").style.display="none";
+  document.getElementById("login-screen").style.display="flex";
+  document.getElementById("admin-user").value="";
+  document.getElementById("admin-pass").value="";
+}
+
+// ── Sidebar ──
+function toggleSidebar(){
+  document.getElementById("sidebar").classList.toggle("open");
+  document.getElementById("sidebar-overlay").classList.toggle("open");
+}
+function closeSidebar(){
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("sidebar-overlay").classList.remove("open");
+}
+
+// ── Panels ──
+var PANELS = ["overview","members","withdrawals","picks","payments","email"];
+function showPanel(name){
+  PANELS.forEach(function(p){
+    document.getElementById("panel-"+p).classList.toggle("active", p===name);
+    document.getElementById("nav-"+p).classList.toggle("active", p===name);
+  });
+  closeSidebar();
+  if(name==="overview")    renderOverview();
+  if(name==="members")     renderMembers();
+  if(name==="withdrawals") renderWithdrawals();
+  if(name==="picks")       renderPicks();
+  if(name==="payments")    renderPayments();
+  if(name==="email")       { updateRecipientPreview(); renderEmailLog(); }
+}
+
+// ── Init ──
+function initApp(){
+  // Seed some demo withdrawals if none
+  var wd = getWithdrawals();
+  if(wd.length===0){
+    var users = getUsers();
+    var emails = Object.keys(users);
+    if(emails.length>0){
+      wd = [{
+        id: "wd_"+Date.now(),
+        email: emails[0],
+        name: cap(users[emails[0]].name||"member"),
+        amount: 250,
+        method: "CashApp",
+        details: "$MemberTag",
+        status: "pending",
+        ts: Date.now()-3600000
+      }];
+      saveWithdrawals(wd);
+    }
+  }
+  renderOverview();
+}
+
+// ── OVERVIEW ──
+function renderOverview(){
+  var users = getUsers();
+  var list  = Object.values(users);
+  var active  = list.filter(function(u){return u.planActivated;}).length;
+  var pending = list.filter(function(u){return u.plan && !u.planActivated;}).length;
+  var wd      = getWithdrawals().filter(function(w){return w.status==="pending";}).length;
+  document.getElementById("ov-total").textContent      = list.length;
+  document.getElementById("ov-active").textContent     = active;
+  document.getElementById("ov-pending").textContent    = pending;
+  document.getElementById("ov-withdrawals").textContent= wd;
+  // Recent 5
+  var tbody = document.getElementById("recent-tbody");
+  var recent = list.slice(-5).reverse();
+  if(recent.length===0){ tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:#6b7280;padding:24px;">No members yet.</td></tr>'; return; }
+  tbody.innerHTML = recent.map(function(u){
+    return '<tr>'
+      +'<td><span style="font-weight:600;color:#f3f4f6;">'+cap(u.name||"—")+'</span></td>'
+      +'<td style="color:#9ca3af;">'+u.email+'</td>'
+      +'<td>'+(u.plan ? '<span class="badge badge-gold">'+u.plan+'</span>' : '<span class="badge badge-gray">None</span>')+'</td>'
+      +'<td>'+(u.planActivated ? '<span class="badge badge-green">✓ Active</span>' : u.plan ? '<span class="badge" style="background:#7c2d1240;color:#fb923c;border:1px solid #fb923c30;">⏳ Pending</span>' : '<span class="badge badge-gray">Inactive</span>')+'</td>'
+      +'<td style="color:#6b7280;">'+fmtDate(u.joinedAt)+'</td>'
+    +'</tr>';
+  }).join("");
+}
+
+// ── MEMBERS ──
+function renderMembers(){
+  var users  = getUsers();
+  var list   = Object.values(users);
+  var q      = (document.getElementById("member-search")||{}).value||"";
+  if(q) list = list.filter(function(u){ return (u.name||"").toLowerCase().includes(q.toLowerCase()) || (u.email||"").toLowerCase().includes(q.toLowerCase()); });
+  var tbody  = document.getElementById("members-tbody");
+  var empty  = document.getElementById("members-empty");
+  if(list.length===0){ tbody.innerHTML=""; empty.style.display="block"; return; }
+  empty.style.display="none";
+  tbody.innerHTML = list.map(function(u){
+    var statusBadge = u.planActivated
+      ? '<span class="badge badge-green">✓ Active</span>'
+      : u.plan
+        ? '<span class="badge" style="background:#7c2d1240;color:#fb923c;border:1px solid #fb923c30;">⏳ Pending</span>'
+        : '<span class="badge badge-gray">No Plan</span>';
+    return '<tr>'
+      +'<td><div style="font-weight:600;color:#f3f4f6;">'+cap(u.name||"—")+'</div><div style="font-size:11px;color:#6b7280;">'+u.country||"—"+'</div></td>'
+      +'<td style="color:#9ca3af;font-size:12px;">'+u.email+'</td>'
+      +'<td style="color:#9ca3af;font-size:12px;">'+(u.country||"—")+'</td>'
+      +'<td>'+(u.plan ? '<span class="badge badge-gold">'+u.plan+'</span>' : '<span class="badge badge-gray">None</span>')+'</td>'
+      +'<td style="color:#d4af37;font-weight:700;">$'+(parseFloat(u.balance||0).toFixed(2))+'</td>'
+      +'<td>'+statusBadge+'</td>'
+      +'<td><div style="display:flex;gap:6px;flex-wrap:wrap;">'
+        +'<button onclick="openEditMember(\''+u.email+'\')" class="btn-outline btn-sm">Edit</button>'
+        +'<button onclick="toggleActivate(\''+u.email+'\')" class="btn-sm '+(u.planActivated?"btn-red":"btn-green")+'">'+(u.planActivated?"Deactivate":"Activate")+'</button>'
+        +'<button onclick="deleteMember(\''+u.email+'\')" class="btn-sm" style="background:#7f1d1d40;color:#f87171;border:1px solid #f8717130;border-radius:8px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;" onmouseover="this.style.background=\'#cc0000\';this.style.color=\'#fff\'" onmouseout="this.style.background=\'#7f1d1d40\';this.style.color=\'#f87171\'">Delete</button>'
+      +'</div></td>'
+    +'</tr>';
+  }).join("");
+}
+
+function openEditMember(email){
+  var users = getUsers();
+  var u = users[email]; if(!u) return;
+  document.getElementById("edit-email").value    = email;
+  document.getElementById("edit-name").value     = u.name||"";
+  document.getElementById("edit-balance").value  = parseFloat(u.balance||0).toFixed(2);
+  document.getElementById("edit-plan").value     = u.plan||"";
+  document.getElementById("edit-activated").value= u.planActivated ? "true" : "false";
+  openModal("modal-member");
+}
+function saveMember(){
+  var email = document.getElementById("edit-email").value;
+  var users = getUsers();
+  if(!users[email]) return;
+  users[email].name         = document.getElementById("edit-name").value.trim();
+  users[email].balance      = parseFloat(document.getElementById("edit-balance").value||0).toFixed(2);
+  users[email].plan         = document.getElementById("edit-plan").value||null;
+  users[email].planActivated= document.getElementById("edit-activated").value==="true";
+  saveUsers(users);
+  closeModal("modal-member");
+  renderMembers();
+  renderOverview();
+  showToast("✅ Member updated.", "success");
+}
+function toggleActivate(email){
+  var users = getUsers();
+  if(!users[email]) return;
+  users[email].planActivated = !users[email].planActivated;
+  saveUsers(users);
+  renderMembers();
+  renderOverview();
+  showToast(users[email].planActivated ? "✅ Plan activated." : "⛔ Plan deactivated.", "success");
+}
+function deleteMember(email){
+  if(!confirm("Delete "+email+"? This cannot be undone.")) return;
+  var users = getUsers();
+  delete users[email];
+  saveUsers(users);
+  renderMembers();
+  renderOverview();
+  showToast("🗑️ Member deleted.", "success");
+}
+
+// ── WITHDRAWALS ──
+function renderWithdrawals(){
+  var wds = getWithdrawals();
+  var tbody = document.getElementById("withdrawals-tbody");
+  var empty = document.getElementById("wd-empty");
+  if(wds.length===0){ tbody.innerHTML=""; empty.style.display="block"; return; }
+  empty.style.display="none";
+  tbody.innerHTML = wds.map(function(w,i){
+    var badge = w.status==="approved" ? '<span class="badge badge-green">Approved</span>'
+              : w.status==="declined" ? '<span class="badge badge-red">Declined</span>'
+              : '<span class="badge" style="background:#7c2d1240;color:#fb923c;border:1px solid #fb923c30;">Pending</span>';
+    var actions = w.status==="pending"
+      ? '<button onclick="approveWd('+i+')" class="btn-green btn-sm">Approve</button> <button onclick="declineWd('+i+')" class="btn-red btn-sm">Decline</button>'
+      : '<span style="font-size:11px;color:#4b5563;">Done</span>';
+    return '<tr>'
+      +'<td><div style="font-weight:600;color:#f3f4f6;">'+cap(w.name||"—")+'</div><div style="font-size:11px;color:#6b7280;">'+w.email+'</div></td>'
+      +'<td style="color:#d4af37;font-weight:700;">$'+parseFloat(w.amount||0).toFixed(2)+'</td>'
+      +'<td style="color:#9ca3af;">'+w.method+'</td>'
+      +'<td style="color:#9ca3af;font-size:12px;max-width:140px;word-break:break-all;">'+w.details+'</td>'
+      +'<td style="color:#6b7280;font-size:12px;">'+fmtDate(w.ts)+'</td>'
+      +'<td>'+badge+'</td>'
+      +'<td><div style="display:flex;gap:6px;flex-wrap:wrap;">'+actions+'</div></td>'
+    +'</tr>';
+  }).join("");
+}
+function approveWd(i){
+  var wds = getWithdrawals(); wds[i].status="approved"; saveWithdrawals(wds);
+  // Deduct from user balance
+  var users = getUsers();
+  var w = wds[i];
+  if(users[w.email]){
+    var bal = parseFloat(users[w.email].balance||0) - parseFloat(w.amount||0);
+    users[w.email].balance = Math.max(0,bal).toFixed(2);
+    saveUsers(users);
+  }
+  renderWithdrawals(); renderOverview();
+  showToast("✅ Withdrawal approved & balance deducted.", "success");
+}
+function declineWd(i){
+  var wds = getWithdrawals(); wds[i].status="declined"; saveWithdrawals(wds);
+  renderWithdrawals(); renderOverview();
+  showToast("⛔ Withdrawal declined.", "error");
+}
+
+// ── PICKS ──
+function addPick(){
+  var sport = document.getElementById("pick-sport").value.trim();
+  var match = document.getElementById("pick-match").value.trim();
+  var bet   = document.getElementById("pick-bet").value.trim();
+  var odds  = document.getElementById("pick-odds").value.trim();
+  var badge = document.getElementById("pick-badge").value;
+  if(!sport||!match||!bet){ showToast("⚠️ Fill in Sport, Matchup and Pick.", "error"); return; }
+  var picks = getPicks();
+  picks.push({sport,match,bet,odds,badge,ts:Date.now()});
+  savePicks(picks);
+  ["pick-sport","pick-match","pick-bet","pick-odds"].forEach(function(id){document.getElementById(id).value="";});
+  renderPicks();
+  showToast("✅ Pick posted!", "success");
+}
+function deletePick(i){
+  var picks = getPicks(); picks.splice(i,1); savePicks(picks); renderPicks();
+  showToast("🗑️ Pick removed.", "success");
+}
+function clearAllPicks(){
+  if(!confirm("Clear all picks?")) return;
+  savePicks([]); renderPicks(); showToast("🗑️ All picks cleared.", "success");
+}
+function renderPicks(){
+  var picks = getPicks();
+  var list  = document.getElementById("picks-list");
+  var empty = document.getElementById("picks-empty");
+  if(picks.length===0){ list.innerHTML=""; empty.style.display="block"; return; }
+  empty.style.display="none";
+  list.innerHTML = picks.map(function(p,i){
+    return '<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #1e1e1e;flex-wrap:wrap;">'
+      +'<div style="flex:1;min-width:200px;">'
+        +'<div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.12em;margin-bottom:2px;">'+p.sport+'</div>'
+        +'<div style="font-weight:600;font-size:14px;color:#f3f4f6;">'+p.match+'</div>'
+        +'<div style="font-size:12px;color:#d4af37;margin-top:2px;">'+p.bet+'</div>'
+      +'</div>'
+      +'<div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">'
+        +'<span style="font-family:Anton,sans-serif;font-size:18px;color:#f3f4f6;">'+(p.odds||"—")+'</span>'
+        +'<span class="badge badge-gold">'+p.badge+'</span>'
+        +'<button onclick="deletePick('+i+')" class="btn-red btn-sm">Remove</button>'
+      +'</div>'
+    +'</div>';
+  }).join("");
+}
+
+// ── PAYMENT METHODS ──
+function renderPayments(){
+  var methods = getPayments();
+  var container = document.getElementById("payment-cards");
+  container.innerHTML = methods.map(function(m,i){
+    return '<div style="background:#161616;border:1px solid #2e2e2e;border-radius:12px;padding:18px;">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">'
+        +'<div style="display:flex;align-items:center;gap:10px;">'
+          +'<span style="font-size:24px;">'+m.icon+'</span>'
+          +'<span style="font-weight:700;font-size:14px;color:#f3f4f6;">'+m.name+'</span>'
+        +'</div>'
+        +'<div style="display:flex;gap:6px;">'
+          +'<button onclick="openEditPayment('+i+')" class="btn-outline btn-sm">Edit</button>'
+          +'<button onclick="deletePayment('+i+')" class="btn-red btn-sm">Delete</button>'
+        +'</div>'
+      +'</div>'
+      +'<div style="font-size:12px;color:#9ca3af;line-height:1.6;background:#0d0d0d;border:1px solid #1e1e1e;border-radius:8px;padding:10px;">'+m.info+'</div>'
+    +'</div>';
+  }).join("");
+}
+function addPaymentMethod(){
+  var name = document.getElementById("pm-name").value.trim();
+  var icon = document.getElementById("pm-icon").value.trim();
+  var info = document.getElementById("pm-info").value.trim();
+  if(!name||!info){ showToast("⚠️ Name and details required.", "error"); return; }
+  var methods = getPayments();
+  methods.push({id:"pm_"+Date.now(), icon:icon||"💳", name, info});
+  savePayments(methods);
+  document.getElementById("pm-name").value="";
+  document.getElementById("pm-icon").value="";
+  document.getElementById("pm-info").value="";
+  renderPayments();
+  showToast("✅ Payment method saved!", "success");
+}
+function openEditPayment(i){
+  var methods = getPayments();
+  var m = methods[i]; if(!m) return;
+  document.getElementById("pm-edit-idx").value  = i;
+  document.getElementById("pm-edit-name").value = m.name;
+  document.getElementById("pm-edit-icon").value = m.icon;
+  document.getElementById("pm-edit-info").value = m.info;
+  openModal("modal-payment");
+}
+function savePaymentMethod(){
+  var i = parseInt(document.getElementById("pm-edit-idx").value);
+  var methods = getPayments();
+  methods[i].name = document.getElementById("pm-edit-name").value.trim();
+  methods[i].icon = document.getElementById("pm-edit-icon").value.trim();
+  methods[i].info = document.getElementById("pm-edit-info").value.trim();
+  savePayments(methods);
+  closeModal("modal-payment");
+  renderPayments();
+  showToast("✅ Payment method updated!", "success");
+}
+function deletePayment(i){
+  if(!confirm("Delete this payment method?")) return;
+  var methods = getPayments(); methods.splice(i,1); savePayments(methods);
+  renderPayments(); showToast("🗑️ Method deleted.", "success");
+}
+
+// ── EMAIL ──
+function getRecipientList(){
+  var to    = document.getElementById("email-to").value;
+  var users = getUsers();
+  var list  = Object.values(users);
+  if(to==="all")     return list;
+  if(to==="active")  return list.filter(function(u){return u.planActivated;});
+  if(to==="pending") return list.filter(function(u){return u.plan && !u.planActivated;});
+  if(to==="specific"){
+    var addr = (document.getElementById("email-specific")||{}).value||"";
+    return addr ? [{email:addr,name:addr.split("@")[0]}] : [];
+  }
+  return list;
+}
+function updateRecipientPreview(){
+  var to = document.getElementById("email-to").value;
+  var wrap = document.getElementById("specific-email-wrap");
+  wrap.style.display = to==="specific" ? "block" : "none";
+  var recipients = getRecipientList();
+  var preview = document.getElementById("recipient-preview");
+  var count   = document.getElementById("recipient-count");
+  preview.innerHTML = recipients.slice(0,12).map(function(u){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #1e1e1e;">'
+      +'<div style="width:28px;height:28px;background:#1e1e1e;border:1px solid #2e2e2e;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#d4af37;flex-shrink:0;">'+(u.name||"?").charAt(0).toUpperCase()+'</div>'
+      +'<div><div style="font-size:12px;font-weight:600;color:#f3f4f6;">'+cap(u.name||"Unknown")+'</div><div style="font-size:11px;color:#6b7280;">'+u.email+'</div></div>'
+    +'</div>';
+  }).join("")+(recipients.length>12 ? '<div style="font-size:11px;color:#6b7280;padding-top:8px;">+ '+(recipients.length-12)+' more…</div>' : "");
+  count.textContent = recipients.length + " recipient"+(recipients.length!==1?"s":"")+" selected";
+}
+function previewEmail(){
+  var subject = document.getElementById("email-subject").value.trim();
+  var body    = document.getElementById("email-body").value.trim();
+  var to      = document.getElementById("email-to");
+  if(!subject||!body){ showToast("⚠️ Subject and body required.", "error"); return; }
+  document.getElementById("preview-to").textContent      = to.options[to.selectedIndex].text;
+  document.getElementById("preview-subject").textContent = subject;
+  document.getElementById("preview-body").textContent    = body;
+  openModal("modal-preview");
+}
+function sendEmail(){
+  var subject    = document.getElementById("email-subject").value.trim();
+  var body       = document.getElementById("email-body").value.trim();
+  var to         = document.getElementById("email-to");
+  var recipients = getRecipientList();
+  if(!subject||!body){ showToast("⚠️ Subject and message required.", "error"); return; }
+  if(recipients.length===0){ showToast("⚠️ No recipients found.", "error"); return; }
+  // Log it
+  var log = getEmailLog();
+  log.unshift({
+    ts: Date.now(),
+    subject,
+    body,
+    toLabel: to.options[to.selectedIndex].text,
+    count: recipients.length,
+    emails: recipients.map(function(u){return u.email;})
+  });
+  saveEmailLog(log);
+  document.getElementById("email-subject").value="";
+  document.getElementById("email-body").value="";
+  renderEmailLog();
+  showToast("📧 Email queued for "+recipients.length+" recipient"+(recipients.length!==1?"s":"")+"!", "success");
+  // Build mailto fallback for single recipient
+  if(recipients.length===1){
+    var link = "mailto:"+recipients[0].email+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
+    window.open(link);
+  } else {
+    // Multi: open mailto with all addresses (comma-separated, works in some clients)
+    var addrs = recipients.map(function(u){return u.email;}).join(",");
+    var link  = "mailto:"+addrs+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
+    window.open(link);
+  }
+}
+function renderEmailLog(){
+  var log   = getEmailLog();
+  var el    = document.getElementById("email-log");
+  var empty = document.getElementById("email-log-empty");
+  if(log.length===0){ el.innerHTML=""; empty.style.display="block"; return; }
+  empty.style.display="none";
+  el.innerHTML = log.slice(0,20).map(function(e){
+    return '<div style="padding:12px 16px;border-bottom:1px solid #1e1e1e;display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;">'
+      +'<div style="flex:1;min-width:200px;">'
+        +'<div style="font-weight:600;font-size:13px;color:#f3f4f6;">'+e.subject+'</div>'
+        +'<div style="font-size:11px;color:#6b7280;margin-top:2px;">To: '+e.toLabel+' · '+e.count+' recipients</div>'
+      +'</div>'
+      +'<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">'
+        +'<span class="badge badge-green">Sent</span>'
+        +'<span style="font-size:11px;color:#4b5563;">'+fmtDate(e.ts)+'</span>'
+      +'</div>'
+    +'</div>';
+  }).join("");
+}
+
+// ── Enter key on login ──
+document.addEventListener("keydown", function(e){
+  if(e.key==="Enter" && document.getElementById("login-screen").style.display!=="none"){
+    tryLogin();
+  }
+});
+</script>
+</body>
+</html>
