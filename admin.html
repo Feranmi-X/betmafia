@@ -293,6 +293,13 @@
               <div class="card p-6 mb-5">
                 <div style="font-size: 12px; letter-spacing: 0.12em" class="font-bold uppercase text-gold mb-5">➕ Post New Pick</div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mb-4">
+                  <div class="sm:col-span-2 xl:col-span-3">
+                    <label class="field-label">Post To</label>
+                    <select id="pick-target" class="field">
+                      <option value="">📢 All Members</option>
+                    </select>
+                    <p style="font-size: 11px" class="text-zinc-600 mt-1.5">Choose a member to show this pick on their dashboard only.</p>
+                  </div>
                   <div><label class="field-label">Sport / Event</label><input id="pick-sport" type="text" placeholder="NBA · Tonight 7:30 PM" class="field" /></div>
                   <div><label class="field-label">Matchup</label><input id="pick-match" type="text" placeholder="Lakers vs Celtics" class="field" /></div>
                   <div><label class="field-label">Pick / Bet</label><input id="pick-bet" type="text" placeholder="Lakers -4.5 | Under 228.5" class="field" /></div>
@@ -973,7 +980,25 @@
       }
 
       // ── PICKS ──
+      var pickUserNames = {}; // email -> display name, for the audience badge
+
+      async function loadPickTargets() {
+        var sel = document.getElementById("pick-target");
+        var keep = sel.value;
+        var { data: users } = await sb.from("users").select("email,name").order("name");
+        users = users || [];
+        pickUserNames = {};
+        users.forEach((u) => { pickUserNames[u.email] = u.name || u.email; });
+        sel.innerHTML =
+          '<option value="">📢 All Members</option>' +
+          users
+            .map((u) => `<option value="${escHtml(u.email)}">👤 ${escHtml(cap(u.name || "—"))} — ${escHtml(u.email)}</option>`)
+            .join("");
+        sel.value = keep && pickUserNames[keep] ? keep : "";
+      }
+
       async function renderPicks() {
+        await loadPickTargets();
         var { data: picks } = await sb.from("picks").select("*").order("created_at", { ascending: false });
         picks = picks || [];
 
@@ -988,21 +1013,25 @@
         empty.style.display = "none";
 
         list.innerHTML = picks
-          .map(
-            (p) => `
+          .map((p) => {
+            var audience = p.target_email
+              ? `<span class="badge badge-orange">👤 ${escHtml(cap(pickUserNames[p.target_email] || p.target_email))} only</span>`
+              : '<span class="badge badge-gray">📢 All members</span>';
+            return `
           <div class="flex items-center gap-4 px-5 py-4 flex-wrap hover:bg-white/[.01] transition-colors">
             <div class="flex-1 min-w-[180px]">
               <div style="font-size:10px;letter-spacing:.12em" class="text-zinc-600 uppercase font-bold mb-1">${escHtml(p.sport || "")}</div>
               <div class="font-semibold text-zinc-100 text-sm">${escHtml(p.match || "")}</div>
               <div class="text-gold mt-0.5" style="font-size:12px">${escHtml(p.bet || "")}</div>
+              <div class="mt-2">${audience}</div>
             </div>
             <div class="flex items-center gap-3 flex-shrink-0">
               <span class="font-anton text-xl text-zinc-100">${escHtml(p.odds || "—")}</span>
               <span class="badge badge-gold">${escHtml(p.badge || "")}</span>
               <button onclick="deletePick('${p.id}')" class="btn-red btn-sm">Remove</button>
             </div>
-          </div>`,
-          )
+          </div>`;
+          })
           .join("");
       }
 
@@ -1012,18 +1041,19 @@
         var bet = document.getElementById("pick-bet").value.trim();
         var odds = document.getElementById("pick-odds").value.trim();
         var badge = document.getElementById("pick-badge").value;
+        var target = document.getElementById("pick-target").value || null;
         if (!sport || !match || !bet) {
           showToast("⚠️ Fill in Sport, Matchup and Pick.", "error");
           return;
         }
-        var { error } = await sb.from("picks").insert({ sport, match, bet, odds, badge });
+        var { error } = await sb.from("picks").insert({ sport, match, bet, odds, badge, target_email: target });
         if (error) {
           showToast("❌ " + error.message, "error");
           return;
         }
         ["pick-sport", "pick-match", "pick-bet", "pick-odds"].forEach((id) => (document.getElementById(id).value = ""));
         renderPicks();
-        showToast("✅ Pick posted!", "success");
+        showToast(target ? "✅ Pick posted to " + cap(pickUserNames[target] || target) + " only!" : "✅ Pick posted to all members!", "success");
       }
 
       async function deletePick(id) {

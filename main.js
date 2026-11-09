@@ -566,7 +566,12 @@ async function loadDashboard() {
   if (!activated && hasPlan) sb2.textContent = "💳 Complete Payment";
   var container = document.getElementById("dash-picks");
   container.innerHTML = '<div class="text-gray-500 text-center py-8 text-13">Loading picks…</div>';
-  var pr = await sb.from("picks").select("*").order("created_at", { ascending: false });
+  // Show picks posted to everyone (target_email is null) + picks posted only to this member
+  var pr = await sb
+    .from("picks")
+    .select("*")
+    .or('target_email.is.null,target_email.eq."' + String(currentUser.email).replace(/"/g, "") + '"')
+    .order("created_at", { ascending: false });
   var livePicks = pr.data || [];
   if (!livePicks.length) {
     container.innerHTML = '<div class="text-zinc-600 text-center py-8 text-13">No picks posted today yet. Check back soon.</div>';
