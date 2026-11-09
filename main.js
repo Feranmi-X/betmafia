@@ -20,28 +20,28 @@ function goToAdminPanel() {
 var PLANS = [
   {
     name: "5-Day Trial",
-    price: 80,
+    price: 60,
     duration: "5 Days Access",
     featured: false,
     feats: ["Daily VIP picks (all sports)", "Injury & lineup intel", "Private Discord access", "Same-day release"],
   },
   {
     name: "Weekly",
-    price: 150,
+    price: 100,
     duration: "7 Days Access",
     featured: false,
     feats: ["Daily VIP picks (all sports)", "Injury & lineup intel", "Private Discord access", "Same-day release", "Parlay of the week"],
   },
   {
     name: "Monthly",
-    price: 300,
+    price: 200,
     duration: "30 Days Access",
     featured: true,
     feats: ["Daily VIP picks (all sports)", "Injury & lineup intel", "Private Discord access", "Same-day release", "Parlay of the week", "1-on-1 capper consult", "Exclusive monthly locks"],
   },
   {
     name: "Lifetime",
-    price: 1000,
+    price: 500,
     duration: "Forever Access",
     featured: false,
     feats: ["Everything in Monthly", "Lifetime VIP status", "First pick every day", "Direct capper hotline", "All future upgrades free", "Founding member badge"],
